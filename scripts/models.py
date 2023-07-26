@@ -5,7 +5,7 @@ import numpy as np
 from tensorflow import keras
 from tensorflow.keras.models import load_model
 
-from data import (
+from load_data import (
     input_token_index,
     max_decoder_seq_length,
     max_encoder_seq_length,
