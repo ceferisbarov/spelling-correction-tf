@@ -4,7 +4,7 @@ import json
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.utils import plot_model
 
-from data import decoder_input_data, decoder_target_data, encoder_input_data
+from load_data import decoder_input_data, decoder_target_data, encoder_input_data
 from models import DeepEnsemble
 
 import mlflow
