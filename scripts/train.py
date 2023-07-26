@@ -24,15 +24,14 @@ plot_model(de.models[0][0], show_shapes=True, to_file="images/model.png")
 plot_model(de.models[0][1], show_shapes=True, to_file="images/encoder.png")
 plot_model(de.models[0][2], show_shapes=True, to_file="images/decoder.png")
 
-with mlflow.start_run(run_name="setting-up"):
-    history = de.fit(
-        x=[encoder_input_data, decoder_input_data],
-        y=decoder_target_data,
-        batch_size=batch_size,
-        epochs=epochs,
-        validation_split=0.2,
-        callbacks=callbacks,
-    )
+history = de.fit(
+    x=[encoder_input_data, decoder_input_data],
+    y=decoder_target_data,
+    batch_size=batch_size,
+    epochs=epochs,
+    validation_split=0.2,
+    callbacks=callbacks,
+)
 
-    if not os.path.exists(save_path):
-        de.save(save_path)
+if not os.path.exists(save_path):
+    de.save(save_path)
