@@ -10,6 +10,7 @@ from models import DeepEnsemble
 import mlflow
 
 mlflow.set_tracking_uri("http://10.20.36.26:5002")
+mlflow.set_experiment("deep-ensembles")
 mlflow.autolog()
 
 save_path = "models/DE_v1"
@@ -23,14 +24,15 @@ plot_model(de.models[0][0], show_shapes=True, to_file="images/model.png")
 plot_model(de.models[0][1], show_shapes=True, to_file="images/encoder.png")
 plot_model(de.models[0][2], show_shapes=True, to_file="images/decoder.png")
 
-history = de.fit(
-    x=[encoder_input_data, decoder_input_data],
-    y=decoder_target_data,
-    batch_size=batch_size,
-    epochs=epochs,
-    validation_split=0.2,
-    callbacks=callbacks,
-)
+with mlflow.start_run(run_name="setting-up"):
+    history = de.fit(
+        x=[encoder_input_data, decoder_input_data],
+        y=decoder_target_data,
+        batch_size=batch_size,
+        epochs=epochs,
+        validation_split=0.2,
+        callbacks=callbacks,
+    )
 
-if not os.path.exists(save_path):
-    de.save(save_path)
+    if not os.path.exists(save_path):
+        de.save(save_path)
