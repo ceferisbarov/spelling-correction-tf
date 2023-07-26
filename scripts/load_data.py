@@ -5,7 +5,6 @@ import numpy as np
 test_ratio = 0.2
 
 df = pd.read_csv("data/processed.csv")
-df.drop(["id"], axis=1, inplace=True)
 df.dropna(inplace=True)
 
 test_data = df.sample(frac=test_ratio, random_state=1)
