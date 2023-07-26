@@ -9,7 +9,7 @@ from models import DeepEnsemble
 
 import mlflow
 
-mlflow.set_tracking_uri("http://10.20.36.26:8002")
+mlflow.set_tracking_uri("http://10.20.36.26:5002")
 mlflow.autolog()
 
 save_path = "models/DE_v1"
