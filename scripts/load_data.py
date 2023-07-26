@@ -4,7 +4,7 @@ import numpy as np
 
 test_ratio = 0.2
 
-df = pd.read_csv("data/sc_fb_2022-08-22.csv")
+df = pd.read_csv("data/processed.csv")
 df.drop(["id"], axis=1, inplace=True)
 df.dropna(inplace=True)
 

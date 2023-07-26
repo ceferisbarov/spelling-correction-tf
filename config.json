@@ -1,0 +1,11 @@
+{
+    "mlflow_params":{
+        "tracking_uri": "http://10.20.36.26:5002"
+    },
+    "experiment_params":{
+        "project_name": "light_video_clustering",
+        "model_name": "MobileNet_v2",
+        "clustering": "kmeans",
+        "cluster_num": 2
+        }
+}

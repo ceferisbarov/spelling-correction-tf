@@ -1,4 +1,5 @@
 import os
+import json
 
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.utils import plot_model
@@ -6,6 +7,11 @@ from tensorflow.keras.utils import plot_model
 from data import decoder_input_data, decoder_target_data, encoder_input_data
 from models import DeepEnsemble
 
+import mlflow
+
+mlflow.autolog()
+
+save_path = "models/DE_v1"
 batch_size = 32
 epochs = 10
 
@@ -25,6 +31,5 @@ history = de.fit(
     callbacks=callbacks,
 )
 
-save_path = "models/DE_v1"
 if not os.path.exists(save_path):
     de.save(save_path)
