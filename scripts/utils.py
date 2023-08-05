@@ -3,6 +3,9 @@ import matplotlib.pyplot as plt
 
 
 def levenshteinDistanceDP(token1, token2):
+    """
+    Takes two strings as input and returns the Levenshtein distance as float.
+    """
     distances = np.zeros((len(token1) + 1, len(token2) + 1))
 
     for t1 in range(len(token1) + 1):
@@ -35,6 +38,10 @@ def levenshteinDistanceDP(token1, token2):
 
 
 def plot_results(data):
+    """
+    Takes a dataframe that includes `text`, `label`, `prediction`, `distance`, and `org` columns.
+    Plots the relationship between them.
+    """
     data["distance"] = [
         levenshteinDistanceDP(i, t)
         for i, t in zip(list(data["label"]), list(data["prediction"]))

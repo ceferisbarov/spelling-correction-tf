@@ -3,11 +3,11 @@ import os
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.utils import plot_model
 
-from data import decoder_input_data, decoder_target_data, encoder_input_data
+from load_data import decoder_input_data, decoder_target_data, encoder_input_data
 from models import DeepEnsemble
 
 batch_size = 32
-epochs = 10
+epochs = 1
 
 de = DeepEnsemble(no_models=5, threshold=0.8)
 callbacks = [EarlyStopping(monitor="val_accuracy", patience=5)]

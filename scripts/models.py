@@ -6,7 +6,7 @@ from tensorflow import keras
 from tensorflow.keras.models import load_model
 import tensorflow as tf
 
-from data import (
+from load_data import (
     input_token_index,
     max_decoder_seq_length,
     max_encoder_seq_length,
@@ -45,7 +45,11 @@ class DeepEnsemble:
 
             models.append(tuple(temp_model))
 
+            if len(models) == new.no_models:
+                break
+
         new.models = models
+        new._assert_no_models()
 
         return new
 
@@ -61,6 +65,8 @@ class DeepEnsemble:
 
         now = datetime.now().strftime("%Y%m%d-%H%M%S")
         self.name = name if name else f"DeepEnsemble_{now}"
+
+        self._assert_no_models()
 
     def _assert_no_models(self):
         assert self.no_models == len(
@@ -88,6 +94,8 @@ class DeepEnsemble:
             self.models[i][0].fit(**kwargs)
 
     def predict(self, x):
+        self._assert_no_models()
+
         # Encode the sequence for the models
         input_seq = self.encode_for_inference(x)
 
@@ -112,6 +120,8 @@ class DeepEnsemble:
         return x
 
     def save(self, save_dir=None):
+        self._assert_no_models()
+
         if save_dir is None:
             save_dir = self.name
         if not os.path.exists(save_dir):

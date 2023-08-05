@@ -1,6 +1,6 @@
 import time
 
-from data import (
+from load_data import (
     reverse_target_char_index,
     test_data,
     train_data,
