@@ -32,6 +32,7 @@ class DeepEnsemble:
         new = DeepEnsemble(**kwargs)
         models = []
         for path in list(os.walk(directory))[0][1]:
+
             temp_model = []
             temp_model.append(
                 keras.models.load_model(os.path.join(directory, path, "training"))
@@ -99,25 +100,25 @@ class DeepEnsemble:
         # Encode the sequence for the models
         input_seq = self.encode_for_inference(x)
 
-        # No. of remaining models to run
-        remaining = self.no_models
+        # # No. of remaining models to run
+        # remaining = self.no_models
 
-        # No. of matching predictions required
-        k = self.threshold * self.no_models
+        # # No. of matching predictions required
+        # k = self.threshold * self.no_models
 
-        predictions = {}
-        for i in self.models:
-            out = self.decode_sequence(i[1], i[2], input_seq)
-            predictions[out] = predictions.get(out, 0) + 1
-            remaining -= 1
+        # predictions = {}
+        # for i in self.models:
+        #     out = self.decode_sequence(i[1], i[2], input_seq)
+        #     predictions[out] = predictions.get(out, 0) + 1
+        #     remaining -= 1
 
-            if max(predictions.values()) + remaining < k:
-                return x
+        #     if max(predictions.values()) + remaining < k:
+        #         return x
 
-            elif max(predictions.values()) >= k:
-                return max(predictions, key=predictions.get)
-
-        return x
+        #     elif max(predictions.values()) >= k:
+        #         return max(predictions, key=predictions.get)
+        out = self.decode_sequence(input_seq)
+        return out
 
     def save(self, save_dir=None):
         self._assert_no_models()
@@ -215,20 +216,28 @@ class DeepEnsemble:
 
         return (model, encoder_model, decoder_model)
 
-    def decode_sequence(self, encoder_model, decoder_model, input_seq):
-        input_kws = encoder_model._get_full_signature_list()["serving_default"][
-            "inputs"
-        ].keys()
-        output_kws = list(
-            encoder_model._get_full_signature_list()["serving_default"][
-                "outputs"
+    def decode_sequence(self, input_seq):
+        s_1_list = []
+        s_2_list = []
+        for _, encoder_model, _ in self.models:
+            input_kws = encoder_model._get_full_signature_list()["serving_default"][
+                "inputs"
             ].keys()
-        )
-        inputs = {i: j for i, j in zip(input_kws, [input_seq])}
-        encode = encoder_model.get_signature_runner("serving_default")
-        encoded = encode(**inputs)
-        s_1 = encoded[output_kws[0]]
-        s_2 = encoded[output_kws[1]]
+            output_kws = list(
+                encoder_model._get_full_signature_list()["serving_default"][
+                    "outputs"
+                ].keys()
+            )
+            inputs = {i: j for i, j in zip(input_kws, [input_seq])}
+            encode = encoder_model.get_signature_runner("serving_default")
+            encoded = encode(**inputs)
+            s_1 = encoded[output_kws[0]]
+            s_2 = encoded[output_kws[1]]
+            s_1_list.append(s_1)
+            s_2_list.append(s_2)
+
+        s_1 = np.array(s_1_list).mean(axis=0)
+        s_2 = np.array(s_2_list).mean(axis=0)
 
         # Generate empty target sequence of length 1.
         target_seq = np.zeros((1, 1, num_decoder_tokens), dtype="float32")
@@ -240,23 +249,35 @@ class DeepEnsemble:
         stop_condition = False
         decoded_sentence = ""
         while not stop_condition:
-            input_kws = decoder_model._get_full_signature_list()["serving_default"][
-                "inputs"
-            ].keys()
-            output_kws = list(
-                decoder_model._get_full_signature_list()["serving_default"][
-                    "outputs"
+            output_tokens_list = []
+            c_list = []
+            h_list = []
+            for _, _, decoder_model in self.models:
+                input_kws = decoder_model._get_full_signature_list()["serving_default"][
+                    "inputs"
                 ].keys()
-            )
-            inputs = {i: j for i, j in zip(input_kws, [target_seq, s_1, s_2])}
-            decode = decoder_model.get_signature_runner("serving_default")
-            decoded = decode(**inputs)
+                output_kws = list(
+                    decoder_model._get_full_signature_list()["serving_default"][
+                        "outputs"
+                    ].keys()
+                )
+                inputs = {i: j for i, j in zip(input_kws, [target_seq, s_1, s_2])}
+                decode = decoder_model.get_signature_runner("serving_default")
+                decoded = decode(**inputs)
 
-            output_tokens = decoded[output_kws[0]]
-            c = decoded[output_kws[1]]
-            h = decoded[output_kws[2]]
+                output_tokens = decoded[output_kws[0]]
+                output_tokens_list.append(output_tokens)
+                c = decoded[output_kws[1]]
+                h = decoded[output_kws[2]]
 
-            # Sample a token
+                # Sample a token
+                c_list.append(c)
+                h_list.append(h)
+
+            output_tokens = np.array(output_tokens_list).mean(axis=0)
+            c = np.array(c_list).mean(axis=0)
+            h = np.array(h_list).mean(axis=0)
+
             sampled_token_index = np.argmax(output_tokens[0, -1, :])
             sampled_char = reverse_target_char_index[sampled_token_index]
             decoded_sentence += sampled_char

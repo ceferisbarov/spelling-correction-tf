@@ -9,7 +9,7 @@ from models import DeepEnsemble
 batch_size = 32
 epochs = 1
 
-de = DeepEnsemble(no_models=5, threshold=0.8)
+de = DeepEnsemble(no_models=3, threshold=0.66)
 callbacks = [EarlyStopping(monitor="val_accuracy", patience=5)]
 
 plot_model(de.models[0][0], show_shapes=True, to_file="images/model.png")
