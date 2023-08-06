@@ -1,5 +1,4 @@
 import os
-from math import ceil
 
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.utils import plot_model
@@ -11,7 +10,7 @@ batch_size = 32
 epochs = 10
 
 no_models = 5
-threshold = int(ceil(no_models * 2 / 3) / no_models * 100) / 100
+threshold = int(round(no_models * 2 / 3) / no_models * 100) / 100
 
 de = DeepEnsemble(no_models=no_models, threshold=threshold)
 callbacks = [EarlyStopping(monitor="val_accuracy", patience=5)]
