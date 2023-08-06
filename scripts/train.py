@@ -1,4 +1,5 @@
 import os
+from math import ceil
 
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.utils import plot_model
@@ -9,7 +10,10 @@ from models import DeepEnsemble
 batch_size = 32
 epochs = 1
 
-de = DeepEnsemble(no_models=5, threshold=0.8)
+no_models = 5
+threshold = int(ceil(no_models * 2 / 3) / no_models * 100) / 100
+
+de = DeepEnsemble(no_models=no_models, threshold=threshold)
 callbacks = [EarlyStopping(monitor="val_accuracy", patience=5)]
 
 plot_model(de.models[0][0], show_shapes=True, to_file="images/model.png")
