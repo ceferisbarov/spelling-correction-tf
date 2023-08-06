@@ -86,3 +86,16 @@ def plot_results(data):
     ax3.set_ylim(0, 1)
 
     plt.savefig("images/results")
+
+def shuffle_matrices_by_row(A, B, C):
+
+    num_rows = A.shape[0]
+
+    shuffled_indices = np.arange(num_rows)
+    np.random.shuffle(shuffled_indices)
+
+    A = A[shuffled_indices]
+    B = B[shuffled_indices]
+    C = C[shuffled_indices]
+
+    return A, B, C

@@ -16,6 +16,7 @@ from load_data import (
     reverse_target_char_index,
     target_token_index,
 )
+from utils import shuffle_matrices_by_row
 
 latent_dim = 256  # Latent dimensionality of the encoding space.
 
@@ -91,6 +92,15 @@ class DeepEnsemble:
             kwargs["verbose"] = 1
         for i in range(self.no_models):
             print(f"Training model no. {i+1}")
+
+            encoder_input_data, decoder_input_data = kwargs.get("x")[0], kwargs.get("x")[1]
+            decoder_target_data = kwargs.get("y")
+
+            encoder_input_data, decoder_input_data, decoder_target_data = shuffle_matrices_by_row(encoder_input_data, decoder_input_data, decoder_target_data)
+
+            kwargs["x"] = [encoder_input_data, decoder_input_data]
+            kwargs["y"] = decoder_target_data
+
             self.models[i][0].fit(**kwargs)
 
     def predict(self, x):
