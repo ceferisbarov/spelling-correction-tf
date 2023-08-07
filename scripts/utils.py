@@ -1,5 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from datetime import datetime
+import pandas as pd
 
 
 def levenshteinDistanceDP(token1, token2):
@@ -51,6 +53,11 @@ def plot_results(data):
         levenshteinDistanceDP(i, t)
         for i, t in zip(list(data["label"]), list(data["text"]))
     ]
+
+    now = datetime.now()
+    date_time = now.strftime("%Y-%m-%d-%H-%M-%S")
+    data.to_csv(f"results/DataFrame_{date_time}.csv")
+
     length = data.shape[0]
     org_points = [
         data[data["org"] == 0].shape[0] / length,
@@ -64,28 +71,28 @@ def plot_results(data):
         data[data["distance"] <= 2].shape[0] / length,
         data[data["distance"] <= 3].shape[0] / length,
     ]
-    print(list(map(lambda x: round(x, 3), org_points)))
-    print(list(map(lambda x: round(x, 3), pred_points)))
-    x = range(4)
+    
+    points = np.array([org_points, pred_points])
+    pd.DataFrame(points).to_csv(f"results/Points_{date_time}.csv")
+    org_points, pred_points = points[0], points[1]
 
-    fig, ax1 = plt.subplots()
+    plt.plot(org_points * 100, label = "Word-Label", color='blue', linewidth=2, marker='o')
+    plt.plot(pred_points * 100, label = "Prediction-Label", color='green', linewidth=2, marker='o')
+    plt.plot((pred_points - org_points) * 100, label = "Improvement", color='red', linewidth=2, linestyle=':')
 
-    ax2 = ax1.twinx()
-    ax3 = ax2.twinx()
-    ax1.plot(x, org_points, "g-")
-    ax2.plot(x, pred_points, "b-")
-    ax3.plot(x, np.array(pred_points) - np.array(org_points), "r--")
+    x_ticks = np.arange(0, 4, 1)
+    y_ticks = np.arange(0, 101, 10)
+    y_tick_labels = ['{}%'.format(y) for y in y_ticks]
 
-    ax1.set_xlabel("X data")
-    ax1.set_ylabel("Y1 data", color="g")
-    ax2.set_ylabel("Y2 data", color="b")
-    ax3.set_ylabel("Y3 data", color="r")
+    plt.xticks(x_ticks)
+    plt.yticks(y_ticks, y_tick_labels)
 
-    ax1.set_ylim(0, 1)
-    ax2.set_ylim(0, 1)
-    ax3.set_ylim(0, 1)
+    plt.xlabel('The Levenshtein distance (cumulative)')
+    plt.ylabel('Word Error Rate')
+    plt.title('Three Lines Plot')
 
-    plt.savefig("images/results")
+    plt.legend()
+    plt.savefig(f"results/Plot_{date_time}")
 
 def shuffle_matrices_by_row(A, B, C):
 

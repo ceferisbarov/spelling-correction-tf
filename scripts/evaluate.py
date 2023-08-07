@@ -9,7 +9,7 @@ from models import DeepEnsemble
 from utils import plot_results
 
 load_path = "models/DE_v1"
-myde = DeepEnsemble.load_from_dir(load_path)
+myde = DeepEnsemble.load_from_dir(load_path, no_models=1, threshold=0.99)
 myde.quantize()
 
 chars = reverse_target_char_index.values()

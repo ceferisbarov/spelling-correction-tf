@@ -7,7 +7,7 @@ from load_data import decoder_input_data, decoder_target_data, encoder_input_dat
 from models import DeepEnsemble
 
 batch_size = 32
-epochs = 1
+epochs = 10
 
 no_models = 5
 threshold = int(round(no_models * 2 / 3) / no_models * 100) / 100
@@ -28,6 +28,6 @@ history = de.fit(
     callbacks=callbacks,
 )
 
-save_path = "models/DE_v1"
+save_path = "models/DE_v3"
 if not os.path.exists(save_path):
     de.save(save_path)
