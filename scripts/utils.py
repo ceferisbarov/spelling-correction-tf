@@ -39,7 +39,7 @@ def levenshteinDistanceDP(token1, token2):
     return distances[len(token1)][len(token2)]
 
 
-def plot_results(data):
+def plot_results(data, no_models, treshold):
     """
     Takes a dataframe that includes `text`, `label`, `prediction`, `distance`, and `org` columns.
     Plots the relationship between them.
@@ -55,8 +55,10 @@ def plot_results(data):
     ]
 
     now = datetime.now()
-    date_time = now.strftime("%Y-%m-%d-%H-%M-%S")
-    data.to_csv(f"results/DataFrame_{date_time}.csv")
+    ratio = f"{no_models}-{treshold}"
+    date_time = now.strftime("%Y%m%d-%H%M%S")
+
+    data.to_csv(f"results/DataFrame_{ratio}_{date_time}.csv")
 
     length = data.shape[0]
     org_points = [
@@ -73,7 +75,7 @@ def plot_results(data):
     ]
     
     points = np.array([org_points, pred_points])
-    pd.DataFrame(points).to_csv(f"results/Points_{date_time}.csv")
+    pd.DataFrame(points).to_csv(f"results/Points_{ratio}_{date_time}.csv")
     org_points, pred_points = points[0], points[1]
 
     plt.plot(org_points * 100, label = "Word-Label", color='blue', linewidth=2, marker='o')
@@ -92,7 +94,8 @@ def plot_results(data):
     plt.title('Three Lines Plot')
 
     plt.legend()
-    plt.savefig(f"results/Plot_{date_time}")
+    plt.savefig(f"results/Plot_{ratio}_{date_time}.jpg")
+    plt.close()
 
 def shuffle_matrices_by_row(A, B, C):
 
