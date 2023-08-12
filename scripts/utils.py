@@ -39,7 +39,7 @@ def levenshteinDistanceDP(token1, token2):
     return distances[len(token1)][len(token2)]
 
 
-def plot_results(data, no_models, treshold):
+def plot_results(data, no_models, treshold, accuracy, latency):
     """
     Takes a dataframe that includes `text`, `label`, `prediction`, `distance`, and `org` columns.
     Plots the relationship between them.
@@ -48,17 +48,19 @@ def plot_results(data, no_models, treshold):
         levenshteinDistanceDP(i, t)
         for i, t in zip(list(data["label"]), list(data["prediction"]))
     ]
-    data[data["distance"] == 0].shape[0] / data.shape[0]
     data["org"] = [
         levenshteinDistanceDP(i, t)
         for i, t in zip(list(data["label"]), list(data["text"]))
     ]
 
     now = datetime.now()
-    ratio = f"{no_models}-{treshold}"
     date_time = now.strftime("%Y%m%d-%H%M%S")
+    ratio = f"{no_models}-{treshold}"
 
     data.to_csv(f"results/DataFrame_{ratio}_{date_time}.csv")
+
+    with open("results/metrics.csv", 'a') as csv_file:
+        csv_file.write(f"\n{no_models},{treshold},{accuracy},{str(latency)} sec,{data[data.distance == 0].shape[0]},{data[data.distance == 1].shape[0]},{data[data.distance == 2].shape[0]},{data[data.distance == 3].shape[0]},{data[data.distance == 4].shape[0]}")
 
     length = data.shape[0]
     org_points = [
