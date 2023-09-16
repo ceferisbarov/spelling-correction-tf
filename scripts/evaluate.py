@@ -32,7 +32,7 @@ for n, params in parameters.iterrows():
     output = []
     start = time.time()
     for i, row in enumerate(test_data["text"]):
-        pred = myde.predict(row, seed=n, no_models=no_models, treshold=treshold)
+        pred = myde.predict(row, no_models=no_models, treshold=treshold)
         output.append(pred.strip(" \n\r\t"))
         if i % 25 == 0:
             print(i)

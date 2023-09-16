@@ -1,6 +1,5 @@
 import os
 from datetime import datetime
-import random
 
 import numpy as np
 from tensorflow import keras
@@ -46,6 +45,9 @@ class DeepEnsemble:
             )
 
             models.append(tuple(temp_model))
+
+            if len(models) == new.no_models:
+                break
 
 
         new.models = models
@@ -102,8 +104,8 @@ class DeepEnsemble:
 
             self.models[i][0].fit(**kwargs)
 
-    def predict(self, x, seed, no_models, treshold):
-        # self._assert_no_models()
+    def predict(self, x, no_models, treshold):
+        self._assert_no_models()
 
         # Encode the sequence for the models
         input_seq = self.encode_for_inference(x)
@@ -117,9 +119,6 @@ class DeepEnsemble:
         predictions = {}
 
         models = self.models
-
-        random.seed(seed)
-        random.shuffle(models)
 
         for i in models[:no_models]:
             out = self.decode_sequence(i[1], i[2], input_seq)
