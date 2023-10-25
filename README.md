@@ -1,7 +1,9 @@
 # Spelling correction via Deep Ensembles for Azerbaijani language
 
-Deep learning models are known to be an effective method for spelling correction. We started with an LSTM-based encoder-decoder architecture, as described in this [tutorial](https://keras.io/examples/nlp/lstm_seq2seq/). It worked relatively well for originally incorrect words, but had poor performance in retaining the originally correct words.
+Deep learning models are known to be an effective method for spelling correction. We started with an LSTM-based encoder-decoder architecture, as described in this [tutorial](https://keras.io/examples/nlp/lstm_seq2seq/). It worked relatively well for originally incorrect words, but had poor performance in retaining the originally correct words. For example:
 
+![sample](images/sample.png)
+  
 In order to solve this problem, we tested Deep Ensemble architecture.
 
 ![Deep Ensemble Architecture](images/de.png "Deep Ensemble Architecture")
