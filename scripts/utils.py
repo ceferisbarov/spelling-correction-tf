@@ -78,18 +78,17 @@ def plot_results(data, no_models, treshold, accuracy, latency):
 
     now = datetime.now()
 
-    date_time = now.strftime("%Y%m%d-%H%M%S")
-    ratio = f"{no_models}-{treshold}"
+    stamp = f"{no_models}-{treshold}_{now.strftime('%Y%m%d-%H%M%S')}"
 
     data = calculate_distance(data)
 
-    data.to_csv(f"results/DataFrame_{ratio}_{date_time}.csv")
+    data.to_csv(f"results/DataFrame_{stamp}.csv")
 
     with open("results/metrics.csv", 'a') as csv_file:
         csv_file.write(f"\n{no_models},{treshold},{accuracy},{str(latency)} sec,{data[data.distance == 0].shape[0]},{data[data.distance == 1].shape[0]},{data[data.distance == 2].shape[0]},{data[data.distance == 3].shape[0]},{data[data.distance == 4].shape[0]}")
 
     points = calculate_points(data)
-    pd.DataFrame(points).to_csv(f"results/Points_{ratio}_{date_time}.csv")
+    pd.DataFrame(points).to_csv(f"results/Points_{stamp}.csv")
 
     org_points, pred_points = points
 
@@ -112,10 +111,10 @@ def plot_results(data, no_models, treshold, accuracy, latency):
     plt.title('Model Performance')
 
     plt.legend()
-    plt.savefig(f"results/Plot_{ratio}_{date_time}.jpg")
+    plt.savefig(f"results/Plot_{stamp}.jpg")
     plt.close()
 
-    plot_splitted_dataset(data, no_models, treshold)
+    plot_splitted_dataset(data, stamp)
 
 
 def shuffle_matrices_by_row(A, B, C):
@@ -136,9 +135,7 @@ def split_dataset(data):
     return [data[data.org==0], data[data.org!=0]]
 
 
-def plot_splitted_dataset(data, no_models, treshold):
-    ratio = f"{no_models}-{treshold}" 
-
+def plot_splitted_dataset(data, stamp):
     data_correct, data_incorrect = split_dataset(data)
 
     org_points_correct, pred_points_correct = calculate_points(data_correct)
@@ -174,5 +171,5 @@ def plot_splitted_dataset(data, no_models, treshold):
     axs[1].set_title('Originally Incorrect Dataset')
 
     plt.tight_layout()
-    plt.savefig(f"results/Corr_Incorr_Plot_{ratio}.jpg")
+    plt.savefig(f"results/Corr_Incorr_Plot_{stamp}.jpg")
     plt.close()

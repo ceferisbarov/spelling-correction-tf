@@ -133,6 +133,18 @@ class DeepEnsemble:
 
         return x
 
+    def predict_per_model(self, x, model_id):
+        self._assert_no_models()
+
+        # Encode the sequence for the models
+        input_seq = self.encode_for_inference(x)
+
+        model = self.models[model_id]
+
+        out = self.decode_sequence(model[1], model[2], input_seq)
+
+        return out
+        
     def save(self, save_dir=None):
         self._assert_no_models()
 
