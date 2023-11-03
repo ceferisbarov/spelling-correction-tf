@@ -15,14 +15,14 @@ test_data.dropna(inplace=True)
 # The line below is used to use a fraction of the test dataset, mostly during debugging
 # Set the frac argument to 1 to retrieve the complete dataset
 # Or simply comment out the line
-# test_data = test_data.sample(frac=0.001)
+test_data = test_data.sample(frac=0.001)
 test_data = test_data[test_data["text"].apply(lambda s: all(c in chars for c in s))]
 test_data = test_data[test_data["text"].str.len() <= train_data["text"].str.len().max()]
 
-load_path = "models/DE_v3"
+load_path = "models/DE_v4"
 parameters=pd.read_csv("scripts/parameters.csv", header=0)
 
-myde = DeepEnsemble.load_from_dir(load_path, no_models=8, threshold=8)
+myde = DeepEnsemble.load_from_dir(load_path, no_models=1, threshold=0.95)
 myde.quantize()
 
 for n, params in parameters.iterrows():
