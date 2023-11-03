@@ -6,7 +6,7 @@ from load_data import (
     test_data,
     train_data,
 )
-from models import DeepEnsemble
+from models import Model
 from utils import plot_results
 
 threshold_range = np.linspace(0.6,0.9,10)
@@ -20,11 +20,11 @@ test_data = test_data.sample(frac=1)
 test_data = test_data[test_data["text"].apply(lambda s: all(c in chars for c in s))]
 test_data = test_data[test_data["text"].str.len() <= train_data["text"].str.len().max()]
 
-load_path = "models/DE_v4"
+load_path = "models/DE_v4/model_1"
 no_models = 1
 threshold = 0.80
 
-myde = DeepEnsemble.load_from_dir(load_path, no_models=no_models, threshold=threshold)
+myde = Model.load_from_dir(load_path, threshold=threshold)
 myde.quantize()
 
 output = []

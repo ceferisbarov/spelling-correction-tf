@@ -32,13 +32,13 @@ class Model:
         new = Model(**kwargs)
         model = []
         model.append(
-            keras.models.load_model(os.path.join(directory, path, "training"))
+            keras.models.load_model(os.path.join(directory, "training"))
         )
         model.append(
-            keras.models.load_model(os.path.join(directory, path, "encoder"))
+            keras.models.load_model(os.path.join(directory, "encoder"))
         )
         model.append(
-            keras.models.load_model(os.path.join(directory, path, "decoder"))
+            keras.models.load_model(os.path.join(directory, "decoder"))
         )
 
         new.model = model
@@ -81,17 +81,15 @@ class Model:
         kwargs["x"] = [encoder_input_data, decoder_input_data]
         kwargs["y"] = decoder_target_data
 
-        self.models[0].fit(**kwargs)
+        self.model[0].fit(**kwargs)
 
     def predict(self, x, threshold=None, certain=False):
         if not threshold:
             threshold = self.threshold
             
-        model = self.models[0]
-
         input_seq = self.encode_for_inference(x)
 
-        word, vectors = self.decode_sequence(model[1], model[2], input_seq)
+        word, vectors = self.decode_sequence(self.model[1], self.model[2], input_seq)
         delta = 0
         for vector in vectors:
             temp = vector.flatten()
@@ -115,14 +113,14 @@ class Model:
         self.model[2].save(os.path.join(save_dir, "decoder"))
 
     def quantize(self, include_full_model=False):
-        self.models = [list(i) for i in self.models]
+        self.model = list(self.model)
         if include_full_model:
             model_range = range(0, 3)
         else:
             model_range = range(1, 3)
 
-        for j in model_range:
-            self.models[i][j] = self._quantize_model(self.models[i][j])
+        for i in model_range:
+            self.model[i] = self._quantize_model(self.model[i])
 
     def encode_for_inference(self, input_text):
         encoder_input_text = np.zeros(
