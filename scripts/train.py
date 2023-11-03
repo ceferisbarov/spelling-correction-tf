@@ -1,15 +1,19 @@
+from load_data import decoder_input_data, decoder_target_data, encoder_input_data
+print(decoder_input_data.shape)
+print(decoder_target_data.shape)
+print(encoder_input_data.shape)
+
 import os
 
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.utils import plot_model
 
-from load_data import decoder_input_data, decoder_target_data, encoder_input_data
 from models import DeepEnsemble
 
 batch_size = 32
 epochs = 10
 
-no_models = 5
+no_models = 1
 threshold = int(round(no_models * 2 / 3) / no_models * 100) / 100
 
 de = DeepEnsemble(no_models=no_models, threshold=threshold)
@@ -28,6 +32,6 @@ history = de.fit(
     callbacks=callbacks,
 )
 
-save_path = "models/DE_v3"
+save_path = "models/DE_v4"
 if not os.path.exists(save_path):
     de.save(save_path)
