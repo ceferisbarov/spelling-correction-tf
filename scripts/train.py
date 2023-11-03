@@ -1,3 +1,8 @@
+from load_data import decoder_input_data, decoder_target_data, encoder_input_data
+print(decoder_input_data.shape)
+print(decoder_target_data.shape)
+print(encoder_input_data.shape)
+
 import os
 import json
 
@@ -13,11 +18,13 @@ mlflow.set_tracking_uri("http://10.20.36.26:5002")
 mlflow.set_experiment("deep-ensembles")
 mlflow.autolog()
 
-save_path = "models/DE_v1"
 batch_size = 32
 epochs = 10
 
-de = DeepEnsemble(no_models=5, threshold=0.8)
+no_models = 1
+threshold = int(round(no_models * 2 / 3) / no_models * 100) / 100
+
+de = DeepEnsemble(no_models=no_models, threshold=threshold)
 callbacks = [EarlyStopping(monitor="val_accuracy", patience=5)]
 
 plot_model(de.models[0][0], show_shapes=True, to_file="images/model.png")
@@ -32,6 +39,8 @@ history = de.fit(
     validation_split=0.2,
     callbacks=callbacks,
 )
+
+save_path = "models/DE_v4"
 
 if not os.path.exists(save_path):
     de.save(save_path)
