@@ -9,7 +9,7 @@ from load_data import (
 from models import EntropyModel
 from utils import plot_results
 
-threshold_range = np.linspace(0.6,0.9,10)
+threshold_range = np.linspace(0.2,0.5,7)
 
 chars = reverse_target_char_index.values()
 test_data.dropna(inplace=True)
