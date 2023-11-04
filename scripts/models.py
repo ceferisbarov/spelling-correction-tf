@@ -252,6 +252,26 @@ class Model:
         return decoded_sentence, decoded_vectors
 
 class EntropyModel(Model):
+    def load_from_dir(directory, **kwargs):
+        """
+        Static method to load model from the given directory.
+        The model should be saved in SaveModel format
+        """
+        new = EntropyModel(**kwargs)
+        model = []
+        model.append(
+            keras.models.load_model(os.path.join(directory, "training"))
+        )
+        model.append(
+            keras.models.load_model(os.path.join(directory, "encoder"))
+        )
+        model.append(
+            keras.models.load_model(os.path.join(directory, "decoder"))
+        )
+
+        new.model = model
+
+        return new
     def predict(self, x, threshold=None, certain=False):
         if not threshold:
             threshold = self.threshold
@@ -263,11 +283,10 @@ class EntropyModel(Model):
         for vector in vectors:
             temp = vector.flatten()
             total_entropy += entropy(temp)
-
-        avg_entropy = avg_entropy / (len(vectors))
-        print(avg_entropy)
+        avg_entropy = total_entropy / (len(vectors))
+        # print(avg_entropy)
         if certain:
-            return word if avg_entropy >= threshold else x
+            return word if avg_entropy <= threshold else x
         else:
             return word
 
