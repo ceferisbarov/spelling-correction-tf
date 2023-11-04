@@ -1,10 +1,5 @@
 from load_data import decoder_input_data, decoder_target_data, encoder_input_data
-print(decoder_input_data.shape)
-print(decoder_target_data.shape)
-print(encoder_input_data.shape)
-
 import os
-import json
 
 from tensorflow.keras.callbacks import EarlyStopping
 from tensorflow.keras.utils import plot_model
@@ -12,20 +7,14 @@ from tensorflow.keras.utils import plot_model
 from load_data import decoder_input_data, decoder_target_data, encoder_input_data
 from models import DeepEnsemble
 
-import mlflow
-
-mlflow.set_tracking_uri("http://10.20.36.26:5002")
-mlflow.set_experiment("deep-ensembles")
-mlflow.autolog()
-
 batch_size = 32
-epochs = 10
+epochs = 15
 
-no_models = 1
+no_models = 8
 threshold = int(round(no_models * 2 / 3) / no_models * 100) / 100
 
 de = DeepEnsemble(no_models=no_models, threshold=threshold)
-callbacks = [EarlyStopping(monitor="val_accuracy", patience=5)]
+callbacks = [EarlyStopping(monitor="val_accuracy", patience=3)]
 
 plot_model(de.models[0][0], show_shapes=True, to_file="images/model.png")
 plot_model(de.models[0][1], show_shapes=True, to_file="images/encoder.png")
@@ -40,7 +29,7 @@ history = de.fit(
     callbacks=callbacks,
 )
 
-save_path = "models/DE_v4"
+save_path = "models/DE_v3"
 
 if not os.path.exists(save_path):
     de.save(save_path)

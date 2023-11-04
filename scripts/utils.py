@@ -84,7 +84,7 @@ def plot_results(data, no_models, treshold, accuracy, latency):
 
     data.to_csv(f"results/DataFrame_{stamp}.csv")
 
-    with open("results/metrics.csv", 'a') as csv_file:
+    with open("results_ensemble.csv", 'a') as csv_file:
         csv_file.write(f"\n{no_models},{treshold},{accuracy},{str(latency)} sec,{data[data.distance == 0].shape[0]},{data[data.distance == 1].shape[0]},{data[data.distance == 2].shape[0]},{data[data.distance == 3].shape[0]},{data[data.distance == 4].shape[0]}")
 
     points = calculate_points(data)

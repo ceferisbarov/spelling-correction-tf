@@ -6,7 +6,7 @@ from load_data import (
     test_data,
     train_data,
 )
-from models import Model
+from models import EntropyModel
 from utils import plot_results
 
 threshold_range = np.linspace(0.6,0.9,10)
@@ -25,7 +25,7 @@ for i in range(1,9):
     no_models = 1
     threshold = 0.80
 
-    myde = Model.load_from_dir(load_path, threshold=threshold)
+    myde = EntropyModel.load_from_dir(load_path, threshold=threshold)
     myde.quantize()
 
     output = []

@@ -6,6 +6,8 @@ from tensorflow import keras
 from tensorflow.keras.models import load_model
 import tensorflow as tf
 
+from scipy.stats import entropy
+
 from load_data import (
     input_token_index,
     max_decoder_seq_length,
@@ -248,6 +250,26 @@ class Model:
             s_1, s_2 = c, h
 
         return decoded_sentence, decoded_vectors
+
+class EntropyModel(Model):
+    def predict(self, x, threshold=None, certain=False):
+        if not threshold:
+            threshold = self.threshold
+            
+        input_seq = self.encode_for_inference(x)
+
+        word, vectors = self.decode_sequence(self.model[1], self.model[2], input_seq)
+        total_entropy = 0
+        for vector in vectors:
+            temp = vector.flatten()
+            total_entropy += entropy(temp)
+
+        avg_entropy = avg_entropy / (len(vectors))
+        print(avg_entropy)
+        if certain:
+            return word if avg_entropy >= threshold else x
+        else:
+            return word
 
 class DeepEnsemble(Model):
     """DeepEnsemble class for Seq2Seq ensemble models"""
