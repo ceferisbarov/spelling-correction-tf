@@ -75,26 +75,33 @@ def calculate_points(data):
     return np.array([org_points, pred_points])
 
 
-def plot_results(data, method, no_models, treshold, index, accuracy, latency):
+def plot_results(data, method, accuracy, latency, no_models=None, treshold=None, index=None):
     now = datetime.now()
 
     if method=="ensemble":
         stamp = f"{no_models}-{treshold}_{now.strftime('%Y%m%d-%H%M%S')}"
+    elif method=="base":
+        stamp = f"M{index}_{now.strftime('%Y%m%d-%H%M%S')}"
     else:
-        stamp = f"M-{index}_{now.strftime('%Y%m%d-%H%M%S')}"
+        stamp = f"M{index}_{treshold}_{now.strftime('%Y%m%d-%H%M%S')}"
 
     data = calculate_distance(data)
+    print(f"results/{method}/DataFrame_{stamp}.csv")
 
     data.to_csv(f"results/{method}/DataFrame_{stamp}.csv")
 
-    with open("results/{method}/results.csv", "a") as csv_file:
+    with open(f"results/{method}/results.csv", "a") as csv_file:
         if method=="ensemble":
             csv_file.write(
                 f"\n{no_models},{treshold},{accuracy},{str(latency)} sec,{data[data.distance == 0].shape[0]},{data[data.distance == 1].shape[0]},{data[data.distance == 2].shape[0]},{data[data.distance == 3].shape[0]},{data[data.distance == 4].shape[0]}"
             )
-        else:
+        elif method=="base":
             csv_file.write(
                 f"\n{index},{accuracy},{str(latency)} sec,{data[data.distance == 0].shape[0]},{data[data.distance == 1].shape[0]},{data[data.distance == 2].shape[0]},{data[data.distance == 3].shape[0]},{data[data.distance == 4].shape[0]}"
+            )
+        else:
+            csv_file.write(
+                f"\n{index},{treshold},{accuracy},{str(latency)} sec,{data[data.distance == 0].shape[0]},{data[data.distance == 1].shape[0]},{data[data.distance == 2].shape[0]},{data[data.distance == 3].shape[0]},{data[data.distance == 4].shape[0]}"
             )
 
 

@@ -9,6 +9,7 @@ from load_data import (
 )
 from models import DeepEnsemble
 from utils import plot_results
+from tqdm import tqdm
 
 chars = reverse_target_char_index.values()
 test_data.dropna(inplace=True)

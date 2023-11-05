@@ -41,11 +41,9 @@ class Model:
 
     def __init__(
         self,
-        threshold=0.95,
         name=None,
     ):
         self.model = self.seq2seq_model()
-        self.threshold = threshold
 
         now = datetime.now().strftime("%Y%m%d-%H%M%S")
         self.name = name if name else f"Base_{now}"
@@ -86,9 +84,7 @@ class Model:
 
         self.model[0].fit(**kwargs)
 
-    def predict(self, x, threshold=None, certain=False):
-        if not threshold:
-            threshold = self.threshold
+    def predict(self, x):
 
         input_seq = self.encode_for_inference(x)
 

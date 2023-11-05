@@ -16,7 +16,7 @@ test_data.dropna(inplace=True)
 # The line below is used to use a fraction of the test dataset, mostly during debugging
 # Set the frac argument to 1 to retrieve the complete dataset
 # Or simply comment out the line
-test_data = test_data.sample(frac=1)
+# test_data = test_data.sample(frac=1)
 test_data = test_data[test_data["text"].apply(lambda s: all(c in chars for c in s))]
 test_data = test_data[test_data["text"].str.len() <= train_data["text"].str.len().max()]
 
