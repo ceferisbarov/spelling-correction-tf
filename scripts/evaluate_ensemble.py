@@ -20,7 +20,7 @@ test_data = test_data[test_data["text"].apply(lambda s: all(c in chars for c in 
 test_data = test_data[test_data["text"].str.len() <= train_data["text"].str.len().max()]
 
 load_path = "models/DE_v3"
-parameters=pd.read_csv("scripts/parameters.csv", header=0)
+parameters = pd.read_csv("scripts/parameters.csv", header=0)
 
 myde = DeepEnsemble.load_from_dir(load_path, no_models=8, threshold=8)
 myde.quantize()
@@ -42,6 +42,10 @@ for n, params in parameters.iterrows():
     latency = round(duration / len(test_data), 3)
 
     test_data["prediction"] = output
-    accuracy = round(accuracy_score(y_true=test_data.label, y_pred=test_data.prediction), 3)
+    accuracy = round(
+        accuracy_score(y_true=test_data.label, y_pred=test_data.prediction), 3
+    )
 
-    plot_results(test_data, int(params.n_models), int(params.treshold), accuracy, latency)
+    plot_results(
+        test_data, int(params.n_models), int(params.treshold), accuracy, latency
+    )

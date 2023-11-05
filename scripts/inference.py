@@ -1,12 +1,11 @@
-from models import DeepEnsemble
+from models import EntropyModel
 
-load_path = "models/DE_v3"
+load_path = "models/DE_v3/model_1"
 
-no_models = 8
-threshold = int(round(no_models * 2 / 3) / no_models * 100) / 100
-myde = DeepEnsemble.load_from_dir(load_path, no_models=no_models, threshold=threshold)
+threshold = 0.8
+myde = EntropyModel.load_from_dir(load_path, threshold=threshold)
 
 myde.quantize()
 
 for i in ["salim", "necesn", "komputer", "telefin", "piyanina"]:
-    print(myde.predict(i, no_models=no_models, treshold=threshold))
+    print(myde.predict(i, threshold=threshold, certain=True))

@@ -9,7 +9,7 @@ from load_data import (
 from models import Model
 from utils import plot_results
 
-threshold_range = np.linspace(0.6,0.9,10)
+threshold_range = np.linspace(0.6, 0.9, 10)
 
 chars = reverse_target_char_index.values()
 test_data.dropna(inplace=True)
@@ -20,7 +20,7 @@ test_data = test_data.sample(frac=1)
 test_data = test_data[test_data["text"].apply(lambda s: all(c in chars for c in s))]
 test_data = test_data[test_data["text"].str.len() <= train_data["text"].str.len().max()]
 
-for i in range(1,9):
+for i in range(1, 9):
     load_path = f"models/DE_v3/model_{i}"
     no_models = 1
     threshold = 0.80
