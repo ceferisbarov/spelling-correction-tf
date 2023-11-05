@@ -43,7 +43,7 @@ class DeltaModel(Model):
         now = datetime.now().strftime("%Y%m%d-%H%M%S")
         self.name = name if name else f"Delta_{now}"
 
-    def predict(self, x, threshold=None, certain=False):
+    def predict(self, x, threshold=None):
         if not threshold:
             threshold = self.threshold
 
@@ -57,10 +57,8 @@ class DeltaModel(Model):
             delta += temp[-1].item() - temp[-2].item()
 
         delta = delta / (len(vectors))
-        if certain:
-            return word if delta >= threshold else x
-        else:
-            return word
+        
+        return word if delta >= threshold else x
 
 
 class EntropyModel(DeltaModel):
@@ -96,7 +94,7 @@ class EntropyModel(DeltaModel):
         now = datetime.now().strftime("%Y%m%d-%H%M%S")
         self.name = name if name else f"Entropy_{now}"
 
-    def predict(self, x, threshold=None, certain=False):
+    def predict(self, x, threshold=None):
         if not threshold:
             threshold = self.threshold
 
@@ -109,10 +107,8 @@ class EntropyModel(DeltaModel):
             total_entropy += entropy(temp)
         avg_entropy = total_entropy / (len(vectors))
         # print(avg_entropy)
-        if certain:
-            return word if avg_entropy <= threshold else x
-        else:
-            return word
+        return word if avg_entropy <= threshold else x
+
 
 
 class DeepEnsemble(Model):
