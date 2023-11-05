@@ -75,22 +75,31 @@ def calculate_points(data):
     return np.array([org_points, pred_points])
 
 
-def plot_results(data, no_models, treshold, accuracy, latency):
+def plot_results(data, method, no_models, treshold, index, accuracy, latency):
     now = datetime.now()
 
-    stamp = f"{no_models}-{treshold}_{now.strftime('%Y%m%d-%H%M%S')}"
+    if method=="ensemble":
+        stamp = f"{no_models}-{treshold}_{now.strftime('%Y%m%d-%H%M%S')}"
+    else:
+        stamp = f"M-{index}_{now.strftime('%Y%m%d-%H%M%S')}"
 
     data = calculate_distance(data)
 
-    data.to_csv(f"results/DataFrame_{stamp}.csv")
+    data.to_csv(f"results/{method}/DataFrame_{stamp}.csv")
 
-    with open("results_ensemble.csv", "a") as csv_file:
-        csv_file.write(
-            f"\n{no_models},{treshold},{accuracy},{str(latency)} sec,{data[data.distance == 0].shape[0]},{data[data.distance == 1].shape[0]},{data[data.distance == 2].shape[0]},{data[data.distance == 3].shape[0]},{data[data.distance == 4].shape[0]}"
-        )
+    with open("results/{method}/results.csv", "a") as csv_file:
+        if method=="ensemble":
+            csv_file.write(
+                f"\n{no_models},{treshold},{accuracy},{str(latency)} sec,{data[data.distance == 0].shape[0]},{data[data.distance == 1].shape[0]},{data[data.distance == 2].shape[0]},{data[data.distance == 3].shape[0]},{data[data.distance == 4].shape[0]}"
+            )
+        else:
+            csv_file.write(
+                f"\n{index},{accuracy},{str(latency)} sec,{data[data.distance == 0].shape[0]},{data[data.distance == 1].shape[0]},{data[data.distance == 2].shape[0]},{data[data.distance == 3].shape[0]},{data[data.distance == 4].shape[0]}"
+            )
+
 
     points = calculate_points(data)
-    pd.DataFrame(points).to_csv(f"results/Points_{stamp}.csv")
+    pd.DataFrame(points).to_csv(f"results/{method}/Points_{stamp}.csv")
 
     org_points, pred_points = points
 
@@ -123,10 +132,10 @@ def plot_results(data, no_models, treshold, accuracy, latency):
     plt.title("Model Performance")
 
     plt.legend()
-    plt.savefig(f"results/Plot_{stamp}.jpg")
+    plt.savefig(f"results/{method}/Plot_{stamp}.jpg")
     plt.close()
 
-    plot_splitted_dataset(data, stamp)
+    plot_splitted_dataset(data, stamp, method)
 
 
 def shuffle_matrices_by_row(A, B, C):
@@ -146,7 +155,7 @@ def split_dataset(data):
     return [data[data.org == 0], data[data.org != 0]]
 
 
-def plot_splitted_dataset(data, stamp):
+def plot_splitted_dataset(data, stamp, method):
     data_correct, data_incorrect = split_dataset(data)
 
     org_points_correct, pred_points_correct = calculate_points(data_correct)
@@ -218,5 +227,5 @@ def plot_splitted_dataset(data, stamp):
     axs[1].set_title("Originally Incorrect Dataset")
 
     plt.tight_layout()
-    plt.savefig(f"results/Corr_Incorr_Plot_{stamp}.jpg")
+    plt.savefig(f"results/{method}/Corr_Incorr_Plot_{stamp}.jpg")
     plt.close()
