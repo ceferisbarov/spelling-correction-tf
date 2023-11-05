@@ -16,13 +16,16 @@ latent_dim = 256  # Latent dimensionality of the encoding space.
 
 
 class Model:
-    """A class for Seq2Seq ensemble models"""
+    """Base class for all spelling correction models."""
 
     @staticmethod
     def load_from_dir(directory, **kwargs):
         pass
 
     def _quantize_model(self, model):
+        """
+        Quantized a single TF model.
+        """
         converter = tf.lite.TFLiteConverter.from_keras_model(model)
         converter.target_spec.supported_ops = [
             tf.lite.OpsSet.TFLITE_BUILTINS,  # enable TensorFlow Lite ops.
@@ -48,6 +51,9 @@ class Model:
         pass
 
     def encode_for_inference(self, input_text):
+        """
+        Creates embeddings to be fed into the model.
+        """
         encoder_input_text = np.zeros(
             (1, max_encoder_seq_length, num_encoder_tokens), dtype="float32"
         )
@@ -57,6 +63,9 @@ class Model:
         return encoder_input_text
 
     def seq2seq_model(self):
+        """
+        Base Seq2Seq model.
+        """
         # Define an input sequence and process it.
         encoder_inputs = keras.Input(shape=(None, num_encoder_tokens))
         encoder = keras.layers.LSTM(latent_dim, return_state=True)
@@ -113,6 +122,10 @@ class Model:
         return (model, encoder_model, decoder_model)
 
     def decode_sequence(self, encoder_model, decoder_model, input_seq):
+        """
+        Inference code. Works with quantized version only.
+        TODO: Add another one for non-quantized version.
+        """
         input_kws = encoder_model._get_full_signature_list()["serving_default"][
             "inputs"
         ].keys()

@@ -11,7 +11,10 @@ from base import Model
 
 
 class DeltaModel(Model):
-    """A class for Seq2Seq ensemble models"""
+    """
+    A single Seq2Seq model. Difference between first and second
+    top softmax scores is used as a metric of uncertainty estimation.
+    """
 
     @staticmethod
     def load_from_dir(directory, **kwargs):
@@ -101,6 +104,11 @@ class DeltaModel(Model):
 
 
 class EntropyModel(DeltaModel):
+    """
+    A single Seq2Seq model. Entropy of softmax scores
+    is used as a metric of uncertainty estimation.
+    """
+
     def load_from_dir(directory, **kwargs):
         """
         Static method to load model from the given directory.
@@ -136,7 +144,7 @@ class EntropyModel(DeltaModel):
 
 
 class DeepEnsemble(Model):
-    """DeepEnsemble class for Seq2Seq ensemble models"""
+    """Deep Ensemble class for Seq2Seq ensemble models."""
 
     @staticmethod
     def load_from_dir(directory, **kwargs):
