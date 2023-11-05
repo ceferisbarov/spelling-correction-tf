@@ -1,6 +1,11 @@
+import os
+from datetime import datetime
+
 import numpy as np
 from tensorflow import keras
 import tensorflow as tf
+
+from utils import shuffle_matrices_by_row
 
 from load_data import (
     input_token_index,
@@ -20,7 +25,30 @@ class Model:
 
     @staticmethod
     def load_from_dir(directory, **kwargs):
-        pass
+        """
+        Static method to load model from the given directory.
+        The model should be saved in SaveModel format
+        """
+        new = Model(**kwargs)
+        model = []
+        model.append(keras.models.load_model(os.path.join(directory, "training")))
+        model.append(keras.models.load_model(os.path.join(directory, "encoder")))
+        model.append(keras.models.load_model(os.path.join(directory, "decoder")))
+
+        new.model = model
+
+        return new
+
+    def __init__(
+        self,
+        threshold=0.95,
+        name=None,
+    ):
+        self.model = self.seq2seq_model()
+        self.threshold = threshold
+
+        now = datetime.now().strftime("%Y%m%d-%H%M%S")
+        self.name = name if name else f"Base_{now}"
 
     def _quantize_model(self, model):
         """
@@ -39,16 +67,54 @@ class Model:
         return interpreter
 
     def fit(self, **kwargs):
-        pass
+        if kwargs.get("verbose") is None:
+            kwargs["verbose"] = 1
+
+        encoder_input_data, decoder_input_data = kwargs.get("x")[0], kwargs.get("x")[1]
+        decoder_target_data = kwargs.get("y")
+
+        (
+            encoder_input_data,
+            decoder_input_data,
+            decoder_target_data,
+        ) = shuffle_matrices_by_row(
+            encoder_input_data, decoder_input_data, decoder_target_data
+        )
+
+        kwargs["x"] = [encoder_input_data, decoder_input_data]
+        kwargs["y"] = decoder_target_data
+
+        self.model[0].fit(**kwargs)
 
     def predict(self, x, threshold=None, certain=False):
-        pass
+        if not threshold:
+            threshold = self.threshold
+
+        input_seq = self.encode_for_inference(x)
+
+        word, _ = self.decode_sequence(self.model[1], self.model[2], input_seq)
+
+        return word
 
     def save(self, save_dir=None):
-        pass
+        if save_dir is None:
+            save_dir = self.name
+        if not os.path.exists(save_dir):
+            os.makedirs(save_dir)
+
+        self.model[0].save(os.path.join(save_dir, "training"))
+        self.model[1].save(os.path.join(save_dir, "encoder"))
+        self.model[2].save(os.path.join(save_dir, "decoder"))
 
     def quantize(self, include_full_model=False):
-        pass
+        self.model = list(self.model)
+        if include_full_model:
+            model_range = range(0, 3)
+        else:
+            model_range = range(1, 3)
+
+        for i in model_range:
+            self.model[i] = self._quantize_model(self.model[i])
 
     def encode_for_inference(self, input_text):
         """

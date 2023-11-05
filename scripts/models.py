@@ -22,7 +22,7 @@ class DeltaModel(Model):
         Static method to load model from the given directory.
         The model should be saved in SaveModel format
         """
-        new = Model(**kwargs)
+        new = DeltaModel(**kwargs)
         model = []
         model.append(keras.models.load_model(os.path.join(directory, "training")))
         model.append(keras.models.load_model(os.path.join(directory, "encoder")))
@@ -41,27 +41,7 @@ class DeltaModel(Model):
         self.threshold = threshold
 
         now = datetime.now().strftime("%Y%m%d-%H%M%S")
-        self.name = name if name else f"Singleton_{now}"
-
-    def fit(self, **kwargs):
-        if kwargs.get("verbose") is None:
-            kwargs["verbose"] = 1
-
-        encoder_input_data, decoder_input_data = kwargs.get("x")[0], kwargs.get("x")[1]
-        decoder_target_data = kwargs.get("y")
-
-        (
-            encoder_input_data,
-            decoder_input_data,
-            decoder_target_data,
-        ) = shuffle_matrices_by_row(
-            encoder_input_data, decoder_input_data, decoder_target_data
-        )
-
-        kwargs["x"] = [encoder_input_data, decoder_input_data]
-        kwargs["y"] = decoder_target_data
-
-        self.model[0].fit(**kwargs)
+        self.name = name if name else f"Delta_{now}"
 
     def predict(self, x, threshold=None, certain=False):
         if not threshold:
@@ -82,26 +62,6 @@ class DeltaModel(Model):
         else:
             return word
 
-    def save(self, save_dir=None):
-        if save_dir is None:
-            save_dir = self.name
-        if not os.path.exists(save_dir):
-            os.makedirs(save_dir)
-
-        self.model[0].save(os.path.join(save_dir, "training"))
-        self.model[1].save(os.path.join(save_dir, "encoder"))
-        self.model[2].save(os.path.join(save_dir, "decoder"))
-
-    def quantize(self, include_full_model=False):
-        self.model = list(self.model)
-        if include_full_model:
-            model_range = range(0, 3)
-        else:
-            model_range = range(1, 3)
-
-        for i in model_range:
-            self.model[i] = self._quantize_model(self.model[i])
-
 
 class EntropyModel(DeltaModel):
     """
@@ -109,6 +69,7 @@ class EntropyModel(DeltaModel):
     is used as a metric of uncertainty estimation.
     """
 
+    @staticmethod
     def load_from_dir(directory, **kwargs):
         """
         Static method to load model from the given directory.
@@ -123,6 +84,17 @@ class EntropyModel(DeltaModel):
         new.model = model
 
         return new
+
+    def __init__(
+        self,
+        threshold=0.95,
+        name=None,
+    ):
+        self.model = self.seq2seq_model()
+        self.threshold = threshold
+
+        now = datetime.now().strftime("%Y%m%d-%H%M%S")
+        self.name = name if name else f"Entropy_{now}"
 
     def predict(self, x, threshold=None, certain=False):
         if not threshold:
