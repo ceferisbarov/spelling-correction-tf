@@ -1,18 +1,14 @@
 import json
 import pandas as pd
 import numpy as np
-from sklearn.model_selection import train_test_split
 
 """
 This script takes the processed data, and prepares it for downstream tasks.
 """
-test_size = 0.2
 
-df = pd.read_csv("data/processed.csv")
-df.dropna(inplace=True)
-
-train_data, test_data = train_test_split(df, test_size=test_size, random_state=1)
-
+# Load the data
+train_data = pd.read_csv("data/train.csv")
+test_data = pd.read_csv("data/test.csv")
 
 # Vectorize the data.
 input_texts = []
