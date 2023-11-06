@@ -38,14 +38,22 @@ Original Deep Ensemble architecture suggests combining logits, but approach fail
 
 | N_of_models | Treshold | Accuracy |
 |----------|----------|----------|
-| 7 | 1 | 0.707 |
-| 7 | 2 | 0.793 |
-| 7 | 3 | 0.799 |
-| 7 | 4 | 0.783 |
-| 7 | 5 | 0.756 |
-| 7 | 6 | 0.711 |
-| 7 | 7 | 0.629 |
-| - | - | - |
+| 8 | 1 | 0.732 |
+| 8 | 2 | 0.810 |
+| 8 | 3 | 0.812 |
+| 8 | 4 | 0.804 |
+| 8 | 5 | 0.780 |
+| 8 | 6 | 0.746 |
+| 8 | 7 | 0.701 |
+| 8 | 8 | 0.619 |
+
+| Method | Best result |
+|----------|----------|
+| Base model | 0.735 |
+| Delta | 0.757 |
+| Entropy | 0.757 |
+| Ensemble | 0.812 |
+
 
 </td></tr> </table>
 
