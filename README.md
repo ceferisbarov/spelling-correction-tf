@@ -25,14 +25,14 @@ Original Deep Ensemble architecture suggests combining logits, but approach fail
 
 | Models | Accuracy |
 |----------|----------|
-| Model 1 | 0.731 |
-| Model 2 | 0.701 |
-| Model 3 | 0.683 |
-| Model 4 | 0.735 |
-| Model 5 | 0.735 |
-| Model 6 | 0.731 |
-| Model 7 | 0.731 |
-| Model 8 | 0.661 |
+| Model 1 | 0.7309 |
+| Model 2 | 0.70735 |
+| Model 3 | 0.68319 |
+| Model 4 | 0.73531 |
+| Model 5 | 0.7349 |
+| Model 6 | 0.73172 |
+| Model 7 | 0.73162 |
+| Model 8 | 0.66107 |
 
 </td><td>
 
