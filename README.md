@@ -23,41 +23,42 @@ Original Deep Ensemble architecture suggests combining logits, but approach fail
 <tr><th>Prediction per model </th><th>Prediction with multiple models</th></tr>
 <tr><td>
 
-| Models | Accuracy |
-|----------|----------|
-| Model 1 | 0.7309 |
-| Model 2 | 0.70735 |
-| Model 3 | 0.68319 |
-| Model 4 | 0.73531 |
-| Model 5 | 0.7349 |
-| Model 6 | 0.73172 |
-| Model 7 | 0.73162 |
-| Model 8 | 0.66107 |
+| Model ID | Accuracy | Latency per word |
+|----------|----------|----------|
+| Model 1 | 73.1% | 0.003 sec |
+| Model 2 | 70.7% | 0.003 sec |
+| Model 3 | 68.3% | 0.003 sec |
+| Model 4 | 73.5% | 0.003 sec |
+| Model 5 | 73.5% | 0.003 sec |
+| Model 6 | 73.2% | 0.003 sec |
+| Model 7 | 73.2% | 0.003 sec |
+| Model 8 | 66.1% | 0.003 sec |
 
 </td><td>
 
-| N_of_models | Treshold | Accuracy |
-|----------|----------|----------|
-| 8 | 1 | 0.732 |
-| 8 | 2 | 0.810 |
-| 8 | 3 | 0.812 |
-| 8 | 4 | 0.804 |
-| 8 | 5 | 0.780 |
-| 8 | 6 | 0.746 |
-| 8 | 7 | 0.701 |
-| 8 | 8 | 0.619 |
+| Number of models | Treshold | Accuracy | Latency per word |
+|----------|----------|----------|----------|
+| 8 | 1 |  |  |
+| 8 | 2 | 81.0% | 0.006 sec |
+| 8 | 3 | 81.3% | 0.01 sec |
+| 8 | 4 | 80.2% | 0.012 sec |
+| 8 | 5 | 78.0% | 0.015 sec |
+| 8 | 6 |  |  |
+| 8 | 7 |  |  |
+| 8 | 8 |  |  |
 
 
 </td></tr> </table>
 
-| Method | Best result |
-|----------|----------|
-| Base model | 0.735 |
-| Delta | 0.757 |
-| Entropy | 0.757 |
-| Ensemble | 0.812 |
+| Method | Model ID(s) | Threshold | Best Result |
+|----------|----------|----------|----------|
+| Base model | Model 4 | - | 73.5% |
+| Delta | Model 4 | 0.85 | 75.7% |
+| Entropy | Model 4 | 0.3 | 75.7% |
+| Ensemble | Model 1-8 | 3 | 81.3% |
 
 
-This new approach improves the performance considerably.
-![test](results/Corr_Incorr_Plot_1-1.jpg)
-![test](results/Corr_Incorr_Plot_7-3.jpg)
+Our "Ensemble" method improves the performance considerably.
+| Base                            | Delta                            | Entropy                            | Ensemble                            |
+| ----------------------------------- | ----------------------------------- | ----------------------------------- | ----------------------------------- |
+| ![base](images/base_best.jpg) | ![delta](images/delta_best.jpg) |
