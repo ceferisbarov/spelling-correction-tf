@@ -43,9 +43,9 @@ Original Deep Ensemble architecture suggests combining logits, but approach fail
 | 8 | 3 | 81.3% | 0.01 sec |
 | 8 | 4 | 80.2% | 0.012 sec |
 | 8 | 5 | 78.0% | 0.015 sec |
-| 8 | 6 |  |  |
-| 8 | 7 |  |  |
-| 8 | 8 |  |  |
+| 8 | 6 | 74.6% | 0.015 sec |
+| 8 | 7 | 70.1% | 0.016 sec |
+| 8 | 8 | 61.9% | 0.013 sec |
 
 
 </td></tr> </table>
@@ -61,4 +61,4 @@ Original Deep Ensemble architecture suggests combining logits, but approach fail
 Our "Ensemble" method improves the performance considerably.
 | Base                            | Delta                            | Entropy                            | Ensemble                            |
 | ----------------------------------- | ----------------------------------- | ----------------------------------- | ----------------------------------- |
-| ![base](images/base_best.jpg) | ![delta](images/delta_best.jpg) |
+| ![base](images/base_best.jpg) | ![delta](images/delta_best.jpg) | ![delta](images/entropy_best.jpg) | ![delta](images/ensemble_best.jpg) |
