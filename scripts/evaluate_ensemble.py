@@ -23,30 +23,24 @@ test_data = test_data[test_data["text"].str.len() <= train_data["text"].str.len(
 load_path = "models/DE_v3"
 parameters = pd.read_csv("scripts/parameters.csv", header=0)
 
-myde = DeepEnsemble.load_from_dir(load_path, no_models=8, threshold=8)
+myde = DeepEnsemble.load_from_dir(load_path, no_models=8)
 myde.quantize()
 
 for n, params in parameters.iterrows():
     no_models = int(params.n_models)
-    treshold = int(params.treshold / no_models * 100) / 100
+    treshold = int(params.treshold)
 
     output = []
     start = time.time()
-    for i, row in enumerate(test_data["text"]):
-        pred = myde.predict(row, no_models=no_models, treshold=treshold)
+    for i in tqdm(range(len(test_data["text"])), desc=f"n={no_models}, t={treshold}"):
+        pred = myde.predict(test_data["text"].iloc[i], no_models=no_models, treshold=int(treshold / no_models * 100) / 100)
         output.append(pred.strip(" \n\r\t"))
-        if i % 25 == 0:
-            print(i)
 
     end = time.time()
     duration = end - start
     latency = round(duration / len(test_data), 3)
 
     test_data["prediction"] = output
-    accuracy = round(
-        accuracy_score(y_true=test_data.label, y_pred=test_data.prediction), 3
-    )
+    accuracy = round(accuracy_score(y_true=test_data.label, y_pred=test_data.prediction), 5)
 
-    plot_results(
-        test_data, int(params.n_models), int(params.treshold), accuracy, latency
-    )
+    plot_results(data=test_data, method="ensemble", accuracy=accuracy, latency=latency, no_models=no_models, treshold=treshold)
