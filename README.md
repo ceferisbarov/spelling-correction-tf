@@ -47,6 +47,9 @@ Original Deep Ensemble architecture suggests combining logits, but approach fail
 | 8 | 7 | 0.701 |
 | 8 | 8 | 0.619 |
 
+
+</td></tr> </table>
+
 | Method | Best result |
 |----------|----------|
 | Base model | 0.735 |
@@ -54,8 +57,6 @@ Original Deep Ensemble architecture suggests combining logits, but approach fail
 | Entropy | 0.757 |
 | Ensemble | 0.812 |
 
-
-</td></tr> </table>
 
 This new approach improves the performance considerably.
 ![test](results/Corr_Incorr_Plot_1-1.jpg)
