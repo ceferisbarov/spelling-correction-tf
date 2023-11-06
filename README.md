@@ -38,7 +38,7 @@ Original Deep Ensemble architecture suggests combining logits, but approach fail
 
 | Number of models | Treshold | Accuracy | Latency per word |
 |----------|----------|----------|----------|
-| 8 | 1 |  |  |
+| 8 | 1 | 73.5% | 0.002 sec |
 | 8 | 2 | 81.0% | 0.006 sec |
 | 8 | 3 | 81.3% | 0.01 sec |
 | 8 | 4 | 80.2% | 0.012 sec |
@@ -59,6 +59,8 @@ Original Deep Ensemble architecture suggests combining logits, but approach fail
 
 
 Our "Ensemble" method improves the performance considerably.
-| Base                            | Delta                            | Entropy                            | Ensemble                            |
-| ----------------------------------- | ----------------------------------- | ----------------------------------- | ----------------------------------- |
+| Base                            | Delta                            |
+| ----------------------------------- | ----------------------------------- |
 | ![base](images/base_best.jpg) | ![delta](images/delta_best.jpg) | ![delta](images/entropy_best.jpg) | ![delta](images/ensemble_best.jpg) |
+| **Entropy**                            | **Ensemble**                            |
+| ![delta](images/entropy_best.jpg) | ![delta](images/ensemble_best.jpg) |
