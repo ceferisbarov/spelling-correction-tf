@@ -20,45 +20,53 @@ Original Deep Ensemble architecture suggests combining logits, but approach fail
 ## Results
 
 <table>
-<tr><th>Prediction per model </th><th>Prediction with multiple models</th></tr>
+<tr><th>Prediction with BASE models</th><th>Prediction with ENSEMBLE model</th></tr>
 <tr><td>
 
-| Model ID | Accuracy | Latency per word |
-|----------|----------|----------|
-| Model 1 | 73.1% | 0.003 sec |
-| Model 2 | 70.7% | 0.003 sec |
-| Model 3 | 68.3% | 0.003 sec |
-| Model 4 | 73.5% | 0.003 sec |
-| Model 5 | 73.5% | 0.003 sec |
-| Model 6 | 73.2% | 0.003 sec |
-| Model 7 | 73.2% | 0.003 sec |
-| Model 8 | 66.1% | 0.003 sec |
+| Model ID | WER | CER | Word Latency |
+|----------|----------|----------|----------|
+| Model 1 | 25.23% | 6.36% | 0.002 sec |
+| Model 2 | 25.84% | 6.52% | 0.002 sec |
+| Model 3 | 26.93% | 7.23% | 0.002 sec |
+| Model 4 | 26.52% | 6.77% | 0.002 sec |
+| Model 5 | 26.44% | 6.82% | 0.002 sec |
+| Model 6 | 25.01% | 6.03% | 0.002 sec |
+| Model 7 | 25.82% | 6.59% | 0.002 sec |
+| Model 8 | 27.21% | 6.97% | 0.002 sec |
 
 </td><td>
 
-| Number of models | Treshold | Accuracy | Latency per word |
-|----------|----------|----------|----------|
-| 8 | 1 | 73.5% | 0.002 sec |
-| 8 | 2 | 81.0% | 0.006 sec |
-| 8 | 3 | 81.3% | 0.01 sec |
-| 8 | 4 | 80.2% | 0.012 sec |
-| 8 | 5 | 78.0% | 0.015 sec |
-| 8 | 6 | 74.6% | 0.015 sec |
-| 8 | 7 | 70.1% | 0.016 sec |
-| 8 | 8 | 61.9% | 0.013 sec |
-
+| N_of_models | Treshold | WER | CER | Word Latency |
+|----------|----------|----------|----------|----------|
+| 8 | 1 | 26.52% | 6.77% | 0.002 sec |
+| 8 | 2 | 17.82% | 3.64% | 0.006 sec |
+| 8 | 3 | 16.89% | 3.50% | 0.009 sec |
+| 8 | 4 | 17.55% | 3.93% | 0.012 sec |
+| 8 | 5 | 19.57% | 4.67% | 0.014 sec |
+| 8 | 6 | 22.68% | 5.66% | 0.016 sec |
+| 8 | 7 | 27.38% | 6.98% | 0.016 sec |
+| 8 | 8 | 36.61% | 9.43% | 0.014 sec |
 
 </td></tr> </table>
 
-| Method | Model ID(s) | Threshold | Best Result |
+### Best Performing Models
+
+| Method | Model ID(s) | Threshold | Best WER |
 |----------|----------|----------|----------|
-| Base model | Model 4 | - | 73.5% |
-| Delta | Model 4 | 0.85 | 75.7% |
-| Entropy | Model 4 | 0.3 | 75.7% |
-| Ensemble | Model 1-8 | 3 | 81.3% |
+| Base model | Model 6 | - | 25.01% |
+| Delta | Model 1 | 0.85 | 23.44% |
+| Entropy | Model 1 | 0.225 | 23.31% |
+| Ensemble | Model 1-8 | 3 | 16.89% |
 
+| Method | Model ID(s) | Threshold | Best CER |
+|----------|----------|----------|----------|
+| Base model | Model 6 | - | 6.03% |
+| Delta | Model 6 | 0.85 | 5.15% |
+| Entropy | Model 6 | 0.25 | 5.08% |
+| Ensemble | Model 1-8 | 3 | 3.50% |
 
-Our "Ensemble" method improves the performance considerably.
+As you can see, our "Ensemble" method improves the performance considerably.
+
 | Base                            | Delta                            |
 | ----------------------------------- | ----------------------------------- |
 | ![base](images/base_best.jpg) | ![delta](images/delta_best.jpg) | ![delta](images/entropy_best.jpg) | ![delta](images/ensemble_best.jpg) |
