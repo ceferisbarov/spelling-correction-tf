@@ -236,3 +236,29 @@ def plot_splitted_dataset(data, stamp, method):
     plt.tight_layout()
     plt.savefig(f"results/{method}/Corr_Incorr_Plot_{stamp}.jpg")
     plt.close()
+
+
+def CER(y_true, y_pred):
+
+    wrongly_pred = 0
+    all_chars = 0
+
+    for label, pred in zip(y_true, y_pred):
+
+        wrongly_pred += levenshteinDistanceDP(label, pred)
+        all_chars += len(label)
+
+    return wrongly_pred/all_chars
+
+
+def WER(y_true, y_pred):
+
+    wrongly_pred = 0
+    all_words = len(y_true)
+
+    for label, pred in zip(y_true, y_pred):
+
+        if label!=pred:
+            wrongly_pred += 1
+
+    return wrongly_pred/all_words

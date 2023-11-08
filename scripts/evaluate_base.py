@@ -7,7 +7,7 @@ from load_data import (
     train_data,
 )
 from base import Model
-from utils import plot_results
+from utils import plot_results, CER, WER
 from tqdm import tqdm
 
 chars = reverse_target_char_index.values()
@@ -20,7 +20,7 @@ test_data = test_data[test_data["text"].apply(lambda s: all(c in chars for c in 
 test_data = test_data[test_data["text"].str.len() <= train_data["text"].str.len().max()]
 
 for id in range(1, 9):
-    load_path = f"models/DE_v3/model_{id}"
+    load_path = f"models/DE_v4/model_{id}"
 
     myde = Model.load_from_dir(load_path)
     myde.quantize()
@@ -36,6 +36,9 @@ for id in range(1, 9):
     latency = round(duration / len(test_data), 3)
 
     test_data["prediction"] = output
-    accuracy = round(accuracy_score(y_true=test_data.label, y_pred=output), 5)
 
-    plot_results(data=test_data, method="base", index=id, accuracy=accuracy, latency=latency)
+    wer = round(WER(y_true=test_data.label, y_pred=output)*100, 2)
+    cer = round(CER(y_true=test_data.label, y_pred=output)*100, 2)
+    acc = f"WER={wer} CER={cer}"
+
+    plot_results(data=test_data, method="base", index=id, accuracy=acc, latency=latency)

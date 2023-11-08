@@ -8,7 +8,8 @@ from scipy.stats import entropy
 
 from utils import shuffle_matrices_by_row
 from base import Model
-
+import tensorflow as tf
+from tensorflow.keras.callbacks import EarlyStopping
 
 class DeltaModel(Model):
     """
@@ -186,6 +187,11 @@ class DeepEnsemble(Model):
 
             kwargs["x"] = [encoder_input_data, decoder_input_data]
             kwargs["y"] = decoder_target_data
+
+            log_dir = "logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+            tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+
+            kwargs["callbacks"] = [tensorboard_callback, EarlyStopping(monitor="val_accuracy", patience=3)]
 
             self.models[i][0].fit(**kwargs)
 
