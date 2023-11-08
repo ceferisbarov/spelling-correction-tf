@@ -2,6 +2,7 @@ models/*
 !models/.gitkeep
 results/*/*
 !results/*/results.csv
+logs
 
 __pycache__/*
 scripts/__pycache__/*
