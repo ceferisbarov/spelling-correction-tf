@@ -11,6 +11,7 @@ from base import Model
 import tensorflow as tf
 from tensorflow.keras.callbacks import EarlyStopping
 
+
 class DeltaModel(Model):
     """
     A single Seq2Seq model. Difference between first and second
@@ -58,7 +59,7 @@ class DeltaModel(Model):
             delta += temp[-1].item() - temp[-2].item()
 
         delta = delta / (len(vectors))
-        
+
         return word if delta >= threshold else x
 
 
@@ -111,7 +112,6 @@ class EntropyModel(DeltaModel):
         return word if avg_entropy <= threshold else x
 
 
-
 class DeepEnsemble(Model):
     """Deep Ensemble class for Seq2Seq ensemble models."""
 
@@ -147,13 +147,36 @@ class DeepEnsemble(Model):
 
     def __init__(
         self,
+        name=None,
         no_models=3,
         threshold=0.66,
-        name=None,
+        input_token_index=None,
+        max_decoder_seq_length=None,
+        max_encoder_seq_length=None,
+        num_decoder_tokens=None,
+        num_encoder_tokens=None,
+        reverse_target_char_index=None,
+        target_token_index=None,
     ):
         self.no_models = no_models
-        self.models = [self.seq2seq_model() for i in range(self.no_models)]
+
         self.threshold = threshold
+
+        self.input_token_index = input_token_index
+
+        self.max_decoder_seq_length = max_decoder_seq_length
+
+        self.max_encoder_seq_length = max_encoder_seq_length
+
+        self.num_decoder_tokens = num_decoder_tokens
+
+        self.num_encoder_tokens = num_encoder_tokens
+
+        self.reverse_target_char_index = reverse_target_char_index
+
+        self.target_token_index = target_token_index
+
+        self.models = [self.seq2seq_model() for i in range(self.no_models)]
 
         now = datetime.now().strftime("%Y%m%d-%H%M%S")
         self.name = name if name else f"DeepEnsemble_{now}"
@@ -189,9 +212,14 @@ class DeepEnsemble(Model):
             kwargs["y"] = decoder_target_data
 
             log_dir = "logs/fit/" + datetime.now().strftime("%Y%m%d-%H%M%S")
-            tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+            tensorboard_callback = tf.keras.callbacks.TensorBoard(
+                log_dir=log_dir, histogram_freq=1
+            )
 
-            kwargs["callbacks"] = [tensorboard_callback, EarlyStopping(monitor="val_accuracy", patience=3)]
+            kwargs["callbacks"] = [
+                tensorboard_callback,
+                EarlyStopping(monitor="val_accuracy", patience=3),
+            ]
 
             self.models[i][0].fit(**kwargs)
 

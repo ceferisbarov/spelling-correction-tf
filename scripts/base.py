@@ -42,7 +42,28 @@ class Model:
     def __init__(
         self,
         name=None,
+        input_token_index=None,
+        max_decoder_seq_length=None,
+        max_encoder_seq_length=None,
+        num_decoder_tokens=None,
+        num_encoder_tokens=None,
+        reverse_target_char_index=None,
+        target_token_index=None,
     ):
+        self.input_token_index = input_token_index
+
+        self.max_decoder_seq_length = max_decoder_seq_length
+
+        self.max_encoder_seq_length = max_encoder_seq_length
+
+        self.num_decoder_tokens = num_decoder_tokens
+
+        self.num_encoder_tokens = num_encoder_tokens
+
+        self.reverse_target_char_index = reverse_target_char_index
+
+        self.target_token_index = target_token_index
+
         self.model = self.seq2seq_model()
 
         now = datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -117,11 +138,11 @@ class Model:
         Creates embeddings to be fed into the model.
         """
         encoder_input_text = np.zeros(
-            (1, max_encoder_seq_length, num_encoder_tokens), dtype="float32"
+            (1, self.max_encoder_seq_length, self.num_encoder_tokens), dtype="float32"
         )
         for t, char in enumerate(input_text):
-            encoder_input_text[:, t, input_token_index[char]] = 1.0
-        encoder_input_text[:, t + 1 :, input_token_index[" "]] = 1.0
+            encoder_input_text[:, t, self.input_token_index[char]] = 1.0
+        encoder_input_text[:, t + 1 :, self.input_token_index[" "]] = 1.0
         return encoder_input_text
 
     def seq2seq_model(self):
@@ -129,7 +150,7 @@ class Model:
         Base Seq2Seq model.
         """
         # Define an input sequence and process it.
-        encoder_inputs = keras.Input(shape=(None, num_encoder_tokens))
+        encoder_inputs = keras.Input(shape=(None, self.num_encoder_tokens))
         encoder = keras.layers.LSTM(latent_dim, return_state=True)
         _, state_h, state_c = encoder(encoder_inputs)
 
@@ -137,7 +158,7 @@ class Model:
         encoder_states = [state_h, state_c]
 
         # Set up the decoder, using `encoder_states` as initial state.
-        decoder_inputs = keras.Input(shape=(None, num_decoder_tokens))
+        decoder_inputs = keras.Input(shape=(None, self.num_decoder_tokens))
 
         # We set up our decoder to return full output sequences,
         # and to return internal states as well. We don't use the
@@ -148,7 +169,9 @@ class Model:
         decoder_outputs, _, _ = decoder_lstm(
             decoder_inputs, initial_state=encoder_states
         )
-        decoder_dense = keras.layers.Dense(num_decoder_tokens, activation="softmax")
+        decoder_dense = keras.layers.Dense(
+            self.num_decoder_tokens, activation="softmax"
+        )
         decoder_outputs = decoder_dense(decoder_outputs)
 
         # Define the model that will turn
@@ -203,9 +226,9 @@ class Model:
         s_2 = encoded[output_kws[1]]
 
         # Generate empty target sequence of length 1.
-        target_seq = np.zeros((1, 1, num_decoder_tokens), dtype="float32")
+        target_seq = np.zeros((1, 1, self.num_decoder_tokens), dtype="float32")
         # Populate the first character of target sequence with the start character.
-        target_seq[0, 0, target_token_index["\t"]] = 1.0
+        target_seq[0, 0, self.target_token_index["\t"]] = 1.0
 
         # Sampling loop for a batch of sequences
         # (to simplify, here we assume a batch of size 1).
@@ -231,17 +254,20 @@ class Model:
 
             # Sample a token
             sampled_token_index = np.argmax(output_tokens[0, -1, :])
-            sampled_char = reverse_target_char_index[sampled_token_index]
+            sampled_char = self.reverse_target_char_index[sampled_token_index]
             decoded_sentence += sampled_char
             decoded_vectors.append(output_tokens)
 
             # Exit condition: either hit max length
             # or find stop character.
-            if sampled_char == "\n" or len(decoded_sentence) > max_decoder_seq_length:
+            if (
+                sampled_char == "\n"
+                or len(decoded_sentence) > self.max_decoder_seq_length
+            ):
                 stop_condition = True
 
             # Update the target sequence (of length 1).
-            target_seq = np.zeros((1, 1, num_decoder_tokens), dtype="float32")
+            target_seq = np.zeros((1, 1, self.num_decoder_tokens), dtype="float32")
             target_seq[0, 0, sampled_token_index] = 1.0
 
             # Update states
