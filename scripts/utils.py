@@ -262,3 +262,65 @@ def WER(y_true, y_pred):
             wrongly_pred += 1
 
     return wrongly_pred/all_words
+
+def visualize_tresholds(filename, method):
+
+    data = pd.DataFrame(pd.read_csv(filename), columns=["model_id", "treshold", "accuracy"])
+
+    data['wer'], data['cer'] = data.accuracy.apply(lambda x: float(x.split(" ")[0].split("=")[1])), data.accuracy.apply(lambda x: float(x.split(" ")[1].split("=")[1]))
+    data = data.drop(columns=["accuracy"])
+
+    data = data.groupby("model_id")
+
+    sns.set(font="Times New Roman", font_scale=0.7)
+    sns.set_style("whitegrid")
+
+    fig, axs = plt.subplots(1, 2, figsize=(12, 5))
+
+    for i, chunk in data:
+
+        chunk = chunk.sort_values("treshold")
+
+        axs[0].plot(
+            chunk.treshold,
+            chunk.wer,
+            label=f"Model {chunk.model_id.iloc[0]}",
+            linewidth=2
+        )
+
+        axs[1].plot(
+            chunk.treshold,
+            chunk.cer,
+            label=f"Model {chunk.model_id.iloc[0]}",
+            linewidth=2
+        )
+
+    x_ticks = np.linspace(0.7, 0.9, 10)
+    x_tick_labels = ["{}".format(round(x, 2)) for x in x_ticks]
+
+    y_ticks_wer = np.linspace(23, 25, 10)
+    y_tick_labels_wer = ["{}%".format(round(y, 1)) for y in y_ticks_wer]
+    y_ticks_cer = np.linspace(4.4, 6.7, 10)
+    y_tick_labels_cer = ["{}%".format(round(y, 1)) for y in y_ticks_cer]
+
+    axs[0].set_xticks(x_ticks)
+    axs[0].set_xticklabels(x_tick_labels)
+    axs[0].set_yticks(y_ticks_wer)
+    axs[0].set_yticklabels(y_tick_labels_wer)
+
+    axs[1].set_xticks(x_ticks)
+    axs[1].set_xticklabels(x_tick_labels)
+    axs[1].set_yticks(y_ticks_cer)
+    axs[1].set_yticklabels(y_tick_labels_cer)
+
+    axs[0].set_xlabel("Treshold")
+    axs[0].set_ylabel("Word Error Rate")
+    axs[0].legend()
+
+    axs[1].set_xlabel("Treshold")
+    axs[1].set_ylabel("Character Error Rate")
+    axs[1].legend()
+
+    plt.tight_layout()
+    plt.savefig(f"results/{method}/evaluate_treshold.jpg")
+    plt.close()
