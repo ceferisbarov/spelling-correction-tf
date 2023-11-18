@@ -1,11 +1,32 @@
 from models import EntropyModel
+from base import Model
+from load_data import (
+    reverse_target_char_index,
+    test_data,
+    train_data,
+    max_encoder_seq_length,
+    max_decoder_seq_length,
+    num_encoder_tokens,
+    num_decoder_tokens,
+    target_token_index,
+    input_token_index,
+)
 
-load_path = "models/DE_v3/model_1"
+load_path = "models/base_v1"
 
 threshold = 0.8
-myde = EntropyModel.load_from_dir(load_path, threshold=threshold)
+model = Model.load_from_dir(
+    directory=load_path,
+    max_encoder_seq_length=max_encoder_seq_length,
+    max_decoder_seq_length=max_decoder_seq_length,
+    num_encoder_tokens=num_encoder_tokens,
+    num_decoder_tokens=num_decoder_tokens,
+    reverse_target_char_index=reverse_target_char_index,
+    target_token_index=target_token_index,
+    input_token_index=input_token_index,
+)
 
-myde.quantize()
+# model.quantize()
 
 for i in ["salim", "necesn", "komputer", "telefin", "piyanina"]:
-    print(myde.predict(i, threshold=threshold, certain=True))
+    print(model.predict(i))

@@ -15,17 +15,12 @@ from load_data import (
     reverse_target_char_index,
     target_token_index,
 )
-from models import DeepEnsemble
+from models import Model
 
 batch_size = 32
 epochs = 20
 
-no_models = 8
-threshold = int(round(no_models * 2 / 3) / no_models * 100) / 100
-
-de = DeepEnsemble(
-    no_models=no_models,
-    threshold=threshold,
+de = Model(
     max_encoder_seq_length=max_encoder_seq_length,
     max_decoder_seq_length=max_decoder_seq_length,
     num_encoder_tokens=num_encoder_tokens,
@@ -33,10 +28,6 @@ de = DeepEnsemble(
     reverse_target_char_index=reverse_target_char_index,
     target_token_index=target_token_index,
 )
-
-plot_model(de.models[0][0], show_shapes=True, to_file="images/model.png")
-plot_model(de.models[0][1], show_shapes=True, to_file="images/encoder.png")
-plot_model(de.models[0][2], show_shapes=True, to_file="images/decoder.png")
 
 history = de.fit(
     x=[encoder_input_data, decoder_input_data],
@@ -46,7 +37,7 @@ history = de.fit(
     validation_split=0.2,
 )
 
-save_path = "models/DE_v4"
+save_path = "models/base_v2"
 
 if not os.path.exists(save_path):
     de.save(save_path)

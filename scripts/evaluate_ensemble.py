@@ -6,6 +6,12 @@ from load_data import (
     reverse_target_char_index,
     test_data,
     train_data,
+    max_encoder_seq_length,
+    max_decoder_seq_length,
+    num_encoder_tokens,
+    num_decoder_tokens,
+    target_token_index,
+    input_token_index,
 )
 from models import DeepEnsemble
 from utils import plot_results, CER, WER
@@ -23,7 +29,18 @@ test_data = test_data[test_data["text"].str.len() <= train_data["text"].str.len(
 load_path = "models/DE_v4"
 parameters = pd.read_csv("scripts/parameters.csv", header=0)
 
-myde = DeepEnsemble.load_from_dir(load_path, no_models=8)
+myde = DeepEnsemble.load_from_dir(
+    load_path,
+    no_models=8,
+    threshold=3,
+    max_encoder_seq_length=max_encoder_seq_length,
+    max_decoder_seq_length=max_decoder_seq_length,
+    num_encoder_tokens=num_encoder_tokens,
+    num_decoder_tokens=num_decoder_tokens,
+    reverse_target_char_index=reverse_target_char_index,
+    target_token_index=target_token_index,
+    input_token_index=input_token_index,
+)
 myde.quantize()
 
 for n, params in parameters.iterrows():
@@ -33,7 +50,11 @@ for n, params in parameters.iterrows():
     output = []
     start = time.time()
     for i in tqdm(range(len(test_data["text"])), desc=f"n={no_models}, t={treshold}"):
-        pred = myde.predict(test_data["text"].iloc[i], no_models=no_models, treshold=int(treshold / no_models * 100) / 100)
+        pred = myde.predict(
+            test_data["text"].iloc[i],
+            no_models=no_models,
+            treshold=int(treshold / no_models * 100) / 100,
+        )
         output.append(pred.strip(" \n\r\t"))
 
     end = time.time()
@@ -42,8 +63,15 @@ for n, params in parameters.iterrows():
 
     test_data["prediction"] = output
 
-    wer = round(WER(y_true=test_data.label, y_pred=output)*100, 2)
-    cer = round(CER(y_true=test_data.label, y_pred=output)*100, 2)
+    wer = round(WER(y_true=test_data.label, y_pred=output) * 100, 2)
+    cer = round(CER(y_true=test_data.label, y_pred=output) * 100, 2)
     acc = f"WER={wer} CER={cer}"
 
-    plot_results(data=test_data, method="ensemble", accuracy=acc, latency=latency, no_models=no_models, treshold=treshold)
+    plot_results(
+        data=test_data,
+        method="ensemble",
+        accuracy=acc,
+        latency=latency,
+        no_models=no_models,
+        treshold=treshold,
+    )

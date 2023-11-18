@@ -1,8 +1,15 @@
 import os
+import logging
 from datetime import datetime
 
 import numpy as np
+
+
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"  # FATAL
+logging.getLogger("tensorflow").setLevel(logging.FATAL)
+
 from tensorflow import keras
+
 import tensorflow as tf
 
 from utils import shuffle_matrices_by_row
@@ -68,6 +75,7 @@ class Model:
 
         now = datetime.now().strftime("%Y%m%d-%H%M%S")
         self.name = name if name else f"Base_{now}"
+        self.quantized = False
 
     def _quantize_model(self, model):
         """
@@ -106,7 +114,6 @@ class Model:
         self.model[0].fit(**kwargs)
 
     def predict(self, x):
-
         input_seq = self.encode_for_inference(x)
 
         word, _ = self.decode_sequence(self.model[1], self.model[2], input_seq)
@@ -132,6 +139,8 @@ class Model:
 
         for i in model_range:
             self.model[i] = self._quantize_model(self.model[i])
+
+        self.quantized = True
 
     def encode_for_inference(self, input_text):
         """
@@ -169,10 +178,10 @@ class Model:
         decoder_outputs, _, _ = decoder_lstm(
             decoder_inputs, initial_state=encoder_states
         )
-        decoder_dense = keras.layers.Dense(
-            self.num_decoder_tokens, activation="softmax"
-        )
+        decoder_dense = keras.layers.Dense(self.num_decoder_tokens)
         decoder_outputs = decoder_dense(decoder_outputs)
+        decoder_softmax = keras.layers.Softmax()
+        decoder_outputs = decoder_softmax(decoder_outputs)
 
         # Define the model that will turn
         # `encoder_input_data` & `decoder_input_data` into `decoder_target_data`
@@ -200,13 +209,27 @@ class Model:
         decoder_states = [state_h_dec, state_c_dec]
         decoder_dense = model.layers[4]
         decoder_outputs = decoder_dense(decoder_outputs)
+        decoder_softmax = model.layers[5]
+        decoder_outputs = decoder_softmax(decoder_outputs)
         decoder_model = keras.Model(
             [decoder_inputs] + decoder_states_inputs, [decoder_outputs] + decoder_states
         )
 
         return (model, encoder_model, decoder_model)
 
-    def decode_sequence(self, encoder_model, decoder_model, input_seq):
+    def decode_sequence(self, encoder_model, decoder_model, input_seq, scaled=False):
+        if scaled:
+            return self._decode_sequence_scaled(encoder_model, decoder_model, input_seq)
+        if self.quantized:
+            return self._decode_sequence_quantized(
+                encoder_model, decoder_model, input_seq
+            )
+        else:
+            return self._decode_sequence_not_quantized(
+                encoder_model, decoder_model, input_seq
+            )
+
+    def _decode_sequence_quantized(self, encoder_model, decoder_model, input_seq):
         """
         Inference code. Works with quantized version only.
         TODO: Add another one for non-quantized version.
@@ -272,5 +295,95 @@ class Model:
 
             # Update states
             s_1, s_2 = c, h
+
+        return decoded_sentence, decoded_vectors
+
+    def _decode_sequence_not_quantized(self, encoder_model, decoder_model, input_seq):
+        # Encode the input as state vectors.
+        states_value = encoder_model.predict(input_seq, verbose=None)
+
+        # Generate empty target sequence of length 1.
+        target_seq = np.zeros((1, 1, num_decoder_tokens))
+        # Populate the first character of target sequence with the start character.
+        target_seq[0, 0, target_token_index["\t"]] = 1.0
+
+        # Sampling loop for a batch of sequences
+        # (to simplify, here we assume a batch of size 1).
+        stop_condition = False
+        decoded_sentence = ""
+        decoded_vectors = []
+
+        while not stop_condition:
+            output_tokens, h, c = decoder_model.predict(
+                [target_seq] + states_value, verbose=None
+            )
+
+            # Sample a token
+            sampled_token_index = np.argmax(output_tokens[0, -1, :])
+            sampled_char = reverse_target_char_index[sampled_token_index]
+            decoded_sentence += sampled_char
+            decoded_vectors.append(output_tokens)
+
+            # Exit condition: either hit max length
+            # or find stop character.
+            if sampled_char == "\n" or len(decoded_sentence) > max_decoder_seq_length:
+                stop_condition = True
+
+            # Update the target sequence (of length 1).
+            target_seq = np.zeros((1, 1, num_decoder_tokens))
+            target_seq[0, 0, sampled_token_index] = 1.0
+
+            # Update states
+            states_value = [h, c]
+
+        return decoded_sentence, decoded_vectors
+
+    def _decode_sequence_scaled(self, encoder_model, decoder_model, input_seq):
+        # Encode the input as state vectors.
+        states_value = encoder_model.predict(input_seq, verbose=None)
+
+        # Generate empty target sequence of length 1.
+        target_seq = np.zeros((1, 1, num_decoder_tokens))
+        # Populate the first character of target sequence with the start character.
+        target_seq[0, 0, target_token_index["\t"]] = 1.0
+
+        # Sampling loop for a batch of sequences
+        # (to simplify, here we assume a batch of size 1).
+        stop_condition = False
+        decoded_sentence = ""
+        decoded_vectors = []
+
+        x = decoder_model.input
+        y = decoder_model.layers[-2].output
+        k = decoder_model.layers[-1].input
+        m = decoder_model.layers[-1].output
+
+        pre_softmax = keras.Model(x, y)
+        softmax = keras.Model(k, m)
+
+        while not stop_condition:
+            output_tokens, h, c = pre_softmax.predict(
+                [target_seq] + states_value, verbose=None
+            )
+            output_tokens /= 2.0
+            output_tokens = softmax.predict(output_tokens, verbose=None)
+
+            # Sample a token
+            sampled_token_index = np.argmax(output_tokens[0, -1, :])
+            sampled_char = reverse_target_char_index[sampled_token_index]
+            decoded_sentence += sampled_char
+            decoded_vectors.append(output_tokens)
+
+            # Exit condition: either hit max length
+            # or find stop character.
+            if sampled_char == "\n" or len(decoded_sentence) > max_decoder_seq_length:
+                stop_condition = True
+
+            # Update the target sequence (of length 1).
+            target_seq = np.zeros((1, 1, num_decoder_tokens))
+            target_seq[0, 0, sampled_token_index] = 1.0
+
+            # Update states
+            states_value = [h, c]
 
         return decoded_sentence, decoded_vectors

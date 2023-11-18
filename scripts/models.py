@@ -36,10 +36,32 @@ class DeltaModel(Model):
 
     def __init__(
         self,
-        threshold=0.95,
+        threshold,
         name=None,
+        input_token_index=None,
+        max_decoder_seq_length=None,
+        max_encoder_seq_length=None,
+        num_decoder_tokens=None,
+        num_encoder_tokens=None,
+        reverse_target_char_index=None,
+        target_token_index=None,
     ):
+        self.input_token_index = input_token_index
+
+        self.max_decoder_seq_length = max_decoder_seq_length
+
+        self.max_encoder_seq_length = max_encoder_seq_length
+
+        self.num_decoder_tokens = num_decoder_tokens
+
+        self.num_encoder_tokens = num_encoder_tokens
+
+        self.reverse_target_char_index = reverse_target_char_index
+
+        self.target_token_index = target_token_index
+
         self.model = self.seq2seq_model()
+
         self.threshold = threshold
 
         now = datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -87,12 +109,35 @@ class EntropyModel(DeltaModel):
 
     def __init__(
         self,
-        threshold=0.95,
+        threshold,
         name=None,
+        input_token_index=None,
+        max_decoder_seq_length=None,
+        max_encoder_seq_length=None,
+        num_decoder_tokens=None,
+        num_encoder_tokens=None,
+        reverse_target_char_index=None,
+        target_token_index=None,
     ):
+        self.input_token_index = input_token_index
+
+        self.max_decoder_seq_length = max_decoder_seq_length
+
+        self.max_encoder_seq_length = max_encoder_seq_length
+
+        self.num_decoder_tokens = num_decoder_tokens
+
+        self.num_encoder_tokens = num_encoder_tokens
+
+        self.reverse_target_char_index = reverse_target_char_index
+
+        self.target_token_index = target_token_index
+
         self.model = self.seq2seq_model()
+
         self.threshold = threshold
 
+        self.quantized = False
         now = datetime.now().strftime("%Y%m%d-%H%M%S")
         self.name = name if name else f"Entropy_{now}"
 
@@ -107,8 +152,9 @@ class EntropyModel(DeltaModel):
         for vector in vectors:
             temp = vector.flatten()
             total_entropy += entropy(temp)
+            print(entropy(temp))
         avg_entropy = total_entropy / (len(vectors))
-        # print(avg_entropy)
+        print(avg_entropy)
         return word if avg_entropy <= threshold else x
 
 

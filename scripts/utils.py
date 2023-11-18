@@ -75,12 +75,14 @@ def calculate_points(data):
     return np.array([org_points, pred_points])
 
 
-def plot_results(data, method, accuracy, latency, no_models=None, treshold=None, index=None):
+def plot_results(
+    data, method, accuracy, latency, no_models=None, treshold=None, index=None
+):
     now = datetime.now()
 
-    if method=="ensemble":
+    if method == "ensemble":
         stamp = f"{no_models}-{treshold}_{now.strftime('%Y%m%d-%H%M%S')}"
-    elif method=="base":
+    elif method == "base":
         stamp = f"M{index}_{now.strftime('%Y%m%d-%H%M%S')}"
     else:
         stamp = f"M{index}_{treshold}_{now.strftime('%Y%m%d-%H%M%S')}"
@@ -91,11 +93,11 @@ def plot_results(data, method, accuracy, latency, no_models=None, treshold=None,
     data.to_csv(f"results/{method}/DataFrame_{stamp}.csv")
 
     with open(f"results/{method}/results.csv", "a") as csv_file:
-        if method=="ensemble":
+        if method == "ensemble":
             csv_file.write(
                 f"\n{no_models},{treshold},{accuracy},{str(latency)} sec,{data[data.distance == 0].shape[0]},{data[data.distance == 1].shape[0]},{data[data.distance == 2].shape[0]},{data[data.distance == 3].shape[0]},{data[data.distance == 4].shape[0]}"
             )
-        elif method=="base":
+        elif method == "base":
             csv_file.write(
                 f"\n{index},{accuracy},{str(latency)} sec,{data[data.distance == 0].shape[0]},{data[data.distance == 1].shape[0]},{data[data.distance == 2].shape[0]},{data[data.distance == 3].shape[0]},{data[data.distance == 4].shape[0]}"
             )
@@ -103,7 +105,6 @@ def plot_results(data, method, accuracy, latency, no_models=None, treshold=None,
             csv_file.write(
                 f"\n{index},{treshold},{accuracy},{str(latency)} sec,{data[data.distance == 0].shape[0]},{data[data.distance == 1].shape[0]},{data[data.distance == 2].shape[0]},{data[data.distance == 3].shape[0]},{data[data.distance == 4].shape[0]}"
             )
-
 
     points = calculate_points(data)
     pd.DataFrame(points).to_csv(f"results/{method}/Points_{stamp}.csv")
@@ -239,35 +240,35 @@ def plot_splitted_dataset(data, stamp, method):
 
 
 def CER(y_true, y_pred):
-
     wrongly_pred = 0
     all_chars = 0
 
     for label, pred in zip(y_true, y_pred):
-
         wrongly_pred += levenshteinDistanceDP(label, pred)
         all_chars += len(label)
 
-    return wrongly_pred/all_chars
+    return wrongly_pred / all_chars
 
 
 def WER(y_true, y_pred):
-
     wrongly_pred = 0
     all_words = len(y_true)
 
     for label, pred in zip(y_true, y_pred):
-
-        if label!=pred:
+        if label != pred:
             wrongly_pred += 1
 
-    return wrongly_pred/all_words
+    return wrongly_pred / all_words
+
 
 def visualize_tresholds(filename, method):
+    data = pd.DataFrame(
+        pd.read_csv(filename), columns=["model_id", "treshold", "accuracy"]
+    )
 
-    data = pd.DataFrame(pd.read_csv(filename), columns=["model_id", "treshold", "accuracy"])
-
-    data['wer'], data['cer'] = data.accuracy.apply(lambda x: float(x.split(" ")[0].split("=")[1])), data.accuracy.apply(lambda x: float(x.split(" ")[1].split("=")[1]))
+    data["wer"], data["cer"] = data.accuracy.apply(
+        lambda x: float(x.split(" ")[0].split("=")[1])
+    ), data.accuracy.apply(lambda x: float(x.split(" ")[1].split("=")[1]))
     data = data.drop(columns=["accuracy"])
 
     data = data.groupby("model_id")
@@ -278,21 +279,20 @@ def visualize_tresholds(filename, method):
     fig, axs = plt.subplots(1, 2, figsize=(12, 5))
 
     for i, chunk in data:
-
         chunk = chunk.sort_values("treshold")
 
         axs[0].plot(
             chunk.treshold,
             chunk.wer,
             label=f"Model {chunk.model_id.iloc[0]}",
-            linewidth=2
+            linewidth=2,
         )
 
         axs[1].plot(
             chunk.treshold,
             chunk.cer,
             label=f"Model {chunk.model_id.iloc[0]}",
-            linewidth=2
+            linewidth=2,
         )
 
     x_ticks = np.linspace(0.7, 0.9, 10)
@@ -324,3 +324,7 @@ def visualize_tresholds(filename, method):
     plt.tight_layout()
     plt.savefig(f"results/{method}/evaluate_treshold.jpg")
     plt.close()
+
+
+if __name__ == "__main__":
+    visualize_tresholds("results/delta/results.csv", "delta")

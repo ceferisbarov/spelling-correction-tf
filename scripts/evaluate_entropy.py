@@ -5,6 +5,12 @@ from load_data import (
     reverse_target_char_index,
     test_data,
     train_data,
+    max_encoder_seq_length,
+    max_decoder_seq_length,
+    num_encoder_tokens,
+    num_decoder_tokens,
+    target_token_index,
+    input_token_index,
 )
 from models import EntropyModel
 from utils import plot_results, CER, WER
@@ -22,19 +28,29 @@ test_data = test_data[test_data["text"].str.len() <= train_data["text"].str.len(
 
 
 for id in [1, 2, 6, 7]:
-    threshold_range = np.linspace(0.15, 0.25, 5)
+    threshold_range = np.linspace(0.2, 0.5, 5)
 
-    load_path = f"models/DE_v4/model_{id}"
-    myde = EntropyModel.load_from_dir(load_path)
-    myde.quantize()
+    load_path = f"models/base_v2"
+
+    model = EntropyModel.load_from_dir(
+        threshold=0.35,
+        directory=load_path,
+        max_encoder_seq_length=max_encoder_seq_length,
+        max_decoder_seq_length=max_decoder_seq_length,
+        num_encoder_tokens=num_encoder_tokens,
+        num_decoder_tokens=num_decoder_tokens,
+        reverse_target_char_index=reverse_target_char_index,
+        target_token_index=target_token_index,
+        input_token_index=input_token_index,
+    )
+    # model.quantize()
 
     for threshold in threshold_range:
-
         output = []
         start = time.time()
 
         for i in tqdm(range(len(test_data["text"])), desc=f"m={id}, t={threshold}"):
-            pred = myde.predict(test_data["text"].iloc[i], threshold=threshold)
+            pred = model.predict(test_data["text"].iloc[i], threshold=threshold)
             output.append(pred.strip(" \n\r\t"))
 
         end = time.time()
@@ -43,8 +59,15 @@ for id in [1, 2, 6, 7]:
 
         test_data["prediction"] = output
 
-        wer = round(WER(y_true=test_data.label, y_pred=output)*100, 2)
-        cer = round(CER(y_true=test_data.label, y_pred=output)*100, 2)
+        wer = round(WER(y_true=test_data.label, y_pred=output) * 100, 2)
+        cer = round(CER(y_true=test_data.label, y_pred=output) * 100, 2)
         acc = f"WER={wer} CER={cer}"
 
-        plot_results(data=test_data, method="entropy", accuracy=acc, latency=latency, index=id, treshold=threshold)
+        plot_results(
+            data=test_data,
+            method="entropy",
+            accuracy=acc,
+            latency=latency,
+            index=id,
+            treshold=threshold,
+        )

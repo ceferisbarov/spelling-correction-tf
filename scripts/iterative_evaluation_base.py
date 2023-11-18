@@ -48,7 +48,6 @@ for i, data in enumerate(zippy):
     num_encoder_tokens = data[5]
     num_decoder_tokens = data[6]
     reverse_target_char_index = data[7]
-    print(reverse_target_char_index)
     target_token_index = data[8]
     input_token_index = data[9]
     train_data = data[10]
